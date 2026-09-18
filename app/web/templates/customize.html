@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Customize · Volta Newsletter{% endblock %}
+{% block body %}
+<main class="wrap">
+  <h1>Customize newsletter</h1>
+  <p class="muted">Open staff recommendations: {{ open_recs|length }}</p>
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <form method="post" action="/customize">
+    <div class="card">
+      <label for="plan">Bader’s plan</label>
+      <textarea id="plan" name="plan" required>{{ plan or "Lead with this week’s three gatherings. Include any founder wins Laura flagged. Keep yoga/coffee off unless the calendar is thin." }}</textarea>
+    </div>
+    <div class="sticky-actions btn-row two">
+      <button class="btn btn-primary" type="submit">Research &amp; build</button>
+      <a class="btn btn-ghost" href="/home">Back</a>
+    </div>
+  </form>
+</main>
+{% endblock %}

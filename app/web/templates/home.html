@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Home · Volta Newsletter{% endblock %}
+{% block body %}
+<main class="wrap">
+  <h1>Monday newsletter desk</h1>
+  <p class="muted">
+    {% if mailchimp.demo %}DEMO Mailchimp{% else %}LIVE Mailchimp{% endif %}
+    · works on phone &amp; desktop
+  </p>
+
+  {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+
+  <div class="grid">
+    <form class="card" method="post" action="/build/default">
+      <strong>Build from template</strong>
+      <p class="muted">Popular template + staff picks + community signals.</p>
+      <button class="btn" type="submit">Build now</button>
+    </form>
+    <a class="card" href="/customize" style="color:inherit">
+      <strong>Customize</strong>
+      <p class="muted">Prompt your plan, research, fold in staff recs.</p>
+      <span class="btn btn-primary">Customize</span>
+    </a>
+    <a class="card" href="/recommendations" style="color:inherit">
+      <strong>Staff recommendations</strong>
+      <p class="muted">Matt, Rishabh, Laura, Amy can drop what goes in.</p>
+      <span class="btn">Open inbox</span>
+    </a>
+    <a class="card span-2" href="/review" style="color:inherit">
+      <strong>Review &amp; send</strong>
+      <p class="muted">Preview the letter, pick community, email with one tap.</p>
+      <span class="btn btn-success">Review &amp; send</span>
+    </a>
+  </div>
+
+  <div class="card">
+    <strong>Current draft</strong>
+    {% if draft %}
+      <p>{{ draft.week_of }} · {{ draft.mode }} · {{ draft.status }}</p>
+      <p>{{ draft.subject }}</p>
+    {% else %}
+      <p class="muted">No draft yet — build or customize.</p>
+    {% endif %}
+  </div>
+
+  <div class="btn-row two">
+    <a class="btn btn-ghost" href="/history">Send history</a>
+    <a class="btn btn-ghost" href="/logout">Log out</a>
+  </div>
+</main>
+{% endblock %}

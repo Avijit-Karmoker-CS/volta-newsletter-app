@@ -1,48 +1,52 @@
 # Volta Newsletter App
 
-Internal **terminal desk** for Volta’s weekly community newsletter (Bader + staff).  
-Runs in your Mac Terminal — **not** a web app, and **not** macOS system Tk (which caused the blank window).
+Internal newsletter desk for **Bader and staff** — works on **phone and desktop** in a browser.
 
-## Why terminal UI?
+Same Wi‑Fi → open the printed Phone URL on your phone. Desktop → open localhost.
 
-Apple’s system Python ships a deprecated Tk that often opens a blank CustomTkinter window.  
-This app uses [Textual](https://textual.textualize.io/) so it works on your Mac today.
-
-## Quick start
+## Quick start (phone + desktop)
 
 ```bash
 cd volta-newsletter-app
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # already demo-ready
+cp .env.example .env   # demo Mailchimp already set
 python main.py
 ```
 
-Use arrow keys / mouse in the Terminal window. Quit with `Ctrl+C`.
+Then open:
 
-### Demo staff PINs
+- **Desktop:** http://127.0.0.1:8000  
+- **Phone:** http://YOUR-MAC-IP:8000 (printed in the terminal when the app starts — same Wi‑Fi)
 
-| Person   | PIN  | Role        |
-|----------|------|-------------|
-| Bader    | 1111 | editor      |
-| Matt     | 2222 | admin       |
-| Rishabh  | 3333 | contributor |
-| Laura    | 4444 | contributor |
-| Amy      | 5555 | contributor |
+Login: **Bader / 1111**
 
-## Flow
+### Demo flow
 
-1. Sign in as Bader  
-2. **Build from template** or **Customize newsletter**  
-3. Staff can add recommendations anytime  
-4. **Review & email community** → select members → send  
-5. **Send history** shows demo/live campaigns  
+1. **Build now** or **Customize**  
+2. **Review & send**  
+3. Keep community members checked  
+4. Tap **Email to community** (demo send — no live email)  
+5. **Send history** to confirm  
 
-Demo Mailchimp is on by default (no real API key). No live email is sent until you add a real key and set `DEMO_MODE=false`.
+Staff (Laura `4444`, Matt `2222`, etc.) can add recommendations from their phones too.
 
-## Optional later: real Mailchimp GUI
+## Optional terminal UI
 
-If you install Homebrew Python with Tk (`brew install python@3.12 python-tk@3.12`), the older CustomTkinter screens under `app/ui/` can be revived. Until then, use `python main.py` (Textual).
+```bash
+python main.py --tui
+```
+
+## Live Mailchimp later
+
+In `.env`:
+
+```
+DEMO_MODE=false
+MAILCHIMP_API_KEY=...
+MAILCHIMP_SERVER_PREFIX=usX
+MAILCHIMP_AUDIENCE_ID=...
+```
 
 ## License
 

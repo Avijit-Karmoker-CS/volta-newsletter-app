@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}History · Volta Newsletter{% endblock %}
+{% block body %}
+<main class="wrap">
+  <h1>Send history</h1>
+  <div class="card">
+    {% for item in logs %}
+    <div class="log-item">
+      <span class="badge {{ 'demo' if item.demo else 'live' }}">{{ 'DEMO' if item.demo else 'LIVE' }}</span>
+      {{ item.created_at }} · {{ item.campaign_id }}
+      <p><strong>{{ item.subject }}</strong></p>
+      <p class="muted">{{ item.recipient_count or 0 }} recipients · {{ item.status }}</p>
+    </div>
+    {% else %}
+    <p class="muted">No sends yet.</p>
+    {% endfor %}
+  </div>
+  <a class="btn btn-ghost" href="/home">Back</a>
+</main>
+{% endblock %}

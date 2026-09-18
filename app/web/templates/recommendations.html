@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Recommendations · Volta Newsletter{% endblock %}
+{% block body %}
+<main class="wrap">
+  <h1>Staff recommendations</h1>
+  <p class="muted">Adding as {{ user.display_name }}</p>
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+
+  <form method="post" action="/recommendations" class="card">
+    <p>
+      <label for="title">Title</label>
+      <input id="title" name="title" type="text" required placeholder="What should go in" />
+    </p>
+    <p>
+      <label for="body">Note</label>
+      <textarea id="body" name="body" required placeholder="Details for the letter"></textarea>
+    </p>
+    <button class="btn btn-primary" type="submit">Save recommendation</button>
+  </form>
+
+  <div class="card">
+    {% for r in recs %}
+      <div class="log-item">
+        <span class="badge">{{ "in" if r.included else "open" }}</span>
+        <strong>{{ r.author }}</strong> — {{ r.title }}
+        <p class="muted">{{ r.body }}</p>
+      </div>
+    {% else %}
+      <p class="muted">No recommendations yet.</p>
+    {% endfor %}
+  </div>
+
+  <a class="btn btn-ghost" href="/home">Back</a>
+</main>
+{% endblock %}

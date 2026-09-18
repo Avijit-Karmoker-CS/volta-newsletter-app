@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Review & send · Volta Newsletter{% endblock %}
+{% block body %}
+<main class="wrap">
+  <h1>Review &amp; send</h1>
+  <p class="muted">{{ draft.subject }}</p>
+  {% if mailchimp.demo %}
+  <p class="muted">DEMO Mailchimp — full send flow, no live email.</p>
+  {% else %}
+  <p class="muted">LIVE Mailchimp — creates a real campaign.</p>
+  {% endif %}
+
+  {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+
+  <form method="post" action="/review/send">
+    <div class="card">
+      <label for="html">Newsletter HTML</label>
+      <textarea class="code" id="html" name="html">{{ draft.html }}</textarea>
+    </div>
+
+    <div class="card">
+      <strong>Email to community</strong>
+      <p class="muted">Uncheck anyone to exclude.</p>
+      {% for m in members %}
+      <label class="member">
+        <input type="checkbox" name="member_id" value="{{ m.id }}" checked />
+        <span>{{ m.name or m.email }}<small>{{ m.email }}</small></span>
+      </label>
+      {% endfor %}
+    </div>
+
+    <div class="sticky-actions btn-row two">
+      {% if can_send %}
+      <button class="btn btn-success" type="submit">Email to community</button>
+      {% else %}
+      <button class="btn" type="button" disabled>Only Bader/Matt can send</button>
+      {% endif %}
+      <a class="btn btn-ghost" href="/home">Back</a>
+    </div>
+  </form>
+</main>
+{% endblock %}
