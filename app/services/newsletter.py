@@ -8,6 +8,12 @@ from typing import Any
 from app.services import research as research_svc
 from app.services import storage
 
+# Public hero image (email-safe absolute URL) — Halifax waterfront / community vibe
+HERO_IMAGE = (
+    "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4"
+    "?auto=format&fit=crop&w=1120&h=420&q=80"
+)
+
 
 def week_of_label(day: datetime | None = None) -> str:
     d = day or datetime.now()
@@ -29,6 +35,7 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
                 "title": s["title"],
                 "detail": s["summary"],
                 "cta": "See Eventbrite / Volta events",
+                "when": "This week",
             }
         )
 
@@ -90,6 +97,7 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
                 "title": s["title"],
                 "detail": s["summary"],
                 "cta": "Register / learn more",
+                "when": "This week",
             }
         )
 
@@ -108,7 +116,6 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
         opening=opening,
         featured=featured,
         staff_blocks=staff_blocks,
-        research_notes=narrative,
         footer=(
             "Door note: main entrance closed for construction — use Entrance 2 "
             "(2nd Floor Arch) or Entrance 3 (Argyle Street Link)."
@@ -141,15 +148,35 @@ def render_html(
     staff_blocks: list[dict],
     footer: str,
     mode: str,
-    research_notes: str | None = None,
+    research_notes: str | None = None,  # kept for API compat; not shown to recipients
 ) -> str:
+    """Recipient-facing email HTML (looks like the real inbox message)."""
+    _ = research_notes  # internal only — never render in the sent letter
+
     featured_html = "".join(
         f"""
-        <tr><td style="padding:16px 0;border-bottom:1px solid #e8e4dc;">
-          <div style="font-size:18px;font-weight:700;color:#1a1a1a;">{_escape(item.get('title',''))}</div>
-          <div style="margin-top:6px;font-size:15px;line-height:1.5;color:#333;">{_escape(item.get('detail',''))}</div>
-          <div style="margin-top:8px;font-size:13px;color:#0b5fff;">{_escape(item.get('cta',''))}</div>
-        </td></tr>
+        <tr>
+          <td style="padding:0 0 14px 0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#122536;border-radius:4px;">
+              <tr>
+                <td style="padding:16px 18px;border-left:3px solid #c9a227;">
+                  <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#c9a227;">
+                    {_escape(item.get('when') or 'This week')}
+                  </p>
+                  <p style="margin:0 0 8px;font-family:Georgia,serif;font-size:18px;color:#f7f1e4;">
+                    {_escape(item.get('title',''))}
+                  </p>
+                  <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#d8d0c2;">
+                    {_escape(item.get('detail',''))}
+                  </p>
+                  <a href="https://voltaeffect.com/events" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#0b1c2c;background:#c9a227;text-decoration:none;padding:8px 14px;font-weight:bold;">
+                    {_escape(item.get('cta') or 'Register')}
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
         """
         for item in featured
     )
@@ -158,60 +185,79 @@ def render_html(
     if staff_blocks:
         rows = "".join(
             f"""
-            <tr><td style="padding:10px 0;">
-              <div style="font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:#666;">
-                {_escape(block.get('author',''))} recommends
-              </div>
-              <div style="font-size:16px;font-weight:600;margin-top:2px;">{_escape(block.get('title',''))}</div>
-              <div style="font-size:14px;color:#333;margin-top:4px;">{_escape(block.get('body',''))}</div>
-            </td></tr>
+            <tr>
+              <td style="padding:0 0 14px 0;">
+                <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#c9a227;">
+                  {_escape(block.get('author',''))} recommends
+                </p>
+                <p style="margin:0 0 4px;font-family:Georgia,serif;font-size:16px;color:#f7f1e4;">
+                  {_escape(block.get('title',''))}
+                </p>
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#d8d0c2;">
+                  {_escape(block.get('body',''))}
+                </p>
+              </td>
+            </tr>
             """
             for block in staff_blocks
         )
         staff_html = f"""
-        <tr><td style="padding-top:28px;">
-          <div style="font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#1a1a1a;">
-            From the team
-          </div>
-        </td></tr>
-        {rows}
-        """
-
-    research_html = ""
-    if research_notes:
-        research_html = f"""
-        <!-- Research notes (internal preview; trim before send if needed) -->
-        <tr><td style="padding-top:24px;">
-          <div style="font-size:12px;color:#888;white-space:pre-wrap;">{_escape(research_notes)}</div>
-        </td></tr>
+        <tr>
+          <td style="padding:8px 32px 8px;">
+            <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;color:#c9a227;text-transform:uppercase;">From the team</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{rows}</table>
+          </td>
+        </tr>
         """
 
     return f"""<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>{_escape(subject)}</title>
 </head>
-<body style="margin:0;padding:0;background:#f6f3ee;font-family:Georgia,'Times New Roman',serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f6f3ee;">
-    <tr><td align="center" style="padding:32px 12px;">
-      <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="background:#ffffff;padding:32px 36px;border-radius:4px;">
-        <tr><td>
-          <div style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#666;">Volta · Week of { _escape(week_of) }</div>
-          <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;color:#111;">{_escape(subject)}</h1>
-          <p style="margin:16px 0 0;font-size:16px;line-height:1.55;color:#333;">{_escape(opening)}</p>
-        </td></tr>
-        {featured_html}
-        {staff_html}
-        {research_html}
-        <tr><td style="padding-top:28px;font-size:13px;line-height:1.5;color:#666;border-top:1px solid #e8e4dc;">
-          {_escape(footer)}
-        </td></tr>
-        <tr><td style="padding-top:16px;font-size:11px;color:#999;">
-          Generated in Volta Newsletter App ({_escape(mode)}). Unsubscribe is handled in Mailchimp.
-        </td></tr>
-      </table>
-    </td></tr>
+<body style="margin:0;padding:0;background:#e8e2d6;font-family:Georgia,'Times New Roman',serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e8e2d6;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#0b1c2c;">
+          <tr>
+            <td style="padding:0;line-height:0;">
+              <img src="{HERO_IMAGE}" alt="Volta community" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;"/>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px 20px;border-bottom:3px solid #c9a227;">
+              <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;color:#c9a227;text-transform:uppercase;">Week of {_escape(week_of)} · Halifax</p>
+              <h1 style="margin:0;font-family:Georgia,serif;font-size:28px;line-height:1.2;color:#f7f1e4;font-weight:normal;">{_escape(subject)}</h1>
+              <p style="margin:10px 0 0;font-family:Georgia,serif;font-size:16px;color:#c9a227;font-style:italic;">Builders, not bystanders.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 32px 8px;">
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#d8d0c2;">{_escape(opening)}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 32px 8px;">
+              <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;color:#c9a227;text-transform:uppercase;">This week · gatherings</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{featured_html}</table>
+            </td>
+          </tr>
+          {staff_html}
+          <tr>
+            <td style="padding:20px 32px 28px;border-top:1px solid #1a2f42;">
+              <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#b7aea0;">{_escape(footer)}</p>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#7a7468;">
+                <a href="https://voltaeffect.com" style="color:#c9a227;text-decoration:none;">voltaeffect.com</a>
+                · Unsubscribe is handled in Mailchimp
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
   </table>
 </body>
 </html>

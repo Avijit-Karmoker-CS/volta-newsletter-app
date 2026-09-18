@@ -189,6 +189,16 @@ def recommendations_submit(
     return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
 
 
+def _ensure_preview_html(draft: dict) -> dict:
+    """Rebuild older drafts so preview shows the styled letter (not raw source era)."""
+    html = draft.get("html") or ""
+    if "0b1c2c" in html and "<img" in html:
+        return draft
+    if draft.get("mode") == "custom" and draft.get("plan"):
+        return newsletter_svc.build_custom_newsletter(draft["plan"])
+    return newsletter_svc.build_default_newsletter()
+
+
 @app.get("/review", response_class=HTMLResponse)
 def review_page(request: Request):
     user, redirect = _require_user(request)
@@ -198,6 +208,7 @@ def review_page(request: Request):
     if not draft:
         request.session["flash"] = "No draft yet — build one first."
         return RedirectResponse("/home", status_code=status.HTTP_303_SEE_OTHER)
+    draft = _ensure_preview_html(draft)
     members = mailchimp_svc.list_community_members()
     flash = request.session.pop("flash", None)
     return templates.TemplateResponse(
@@ -211,6 +222,23 @@ def review_page(request: Request):
             send_result=None,
         ),
     )
+
+
+@app.get("/preview", response_class=HTMLResponse)
+def preview_letter(request: Request):
+    """Render the draft exactly as a recipient would see it (for iframe + full tab)."""
+    user, redirect = _require_user(request)
+    if redirect:
+        return redirect
+    draft = storage.load_latest_draft()
+    if not draft:
+        return HTMLResponse(
+            "<!DOCTYPE html><html><body style='font-family:sans-serif;padding:24px'>"
+            "<p>No draft to preview. Build a newsletter first.</p></body></html>",
+            status_code=404,
+        )
+    draft = _ensure_preview_html(draft)
+    return HTMLResponse(content=draft["html"], media_type="text/html")
 
 
 @app.post("/review/send")

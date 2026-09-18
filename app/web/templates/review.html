@@ -1,22 +1,38 @@
 {% extends "base.html" %}
 {% block title %}Review & send · Volta Newsletter{% endblock %}
 {% block body %}
-<main class="wrap">
+<main class="wrap wrap-wide">
   <h1>Review &amp; send</h1>
   <p class="muted">{{ draft.subject }}</p>
   {% if mailchimp.demo %}
-  <p class="muted">DEMO Mailchimp — full send flow, no live email.</p>
+  <p class="muted">DEMO Mailchimp — preview below is how it looks in the inbox.</p>
   {% else %}
-  <p class="muted">LIVE Mailchimp — creates a real campaign.</p>
+  <p class="muted">LIVE Mailchimp — preview below is how recipients will see it.</p>
   {% endif %}
 
   {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
 
-  <form method="post" action="/review/send">
-    <div class="card">
-      <label for="html">Newsletter HTML</label>
-      <textarea class="code" id="html" name="html">{{ draft.html }}</textarea>
+  <div class="card preview-card">
+    <div class="preview-toolbar">
+      <strong>Inbox preview</strong>
+      <a class="btn btn-ghost btn-small" href="/preview" target="_blank" rel="noopener">Open full size</a>
     </div>
+    <div class="preview-frame-wrap">
+      <iframe
+        class="preview-frame"
+        title="Newsletter preview"
+        src="/preview"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </div>
+
+  <form method="post" action="/review/send">
+    <details class="card">
+      <summary>Edit HTML source (advanced)</summary>
+      <p class="muted">Most people don’t need this — the preview above is the real letter.</p>
+      <textarea class="code" id="html" name="html">{{ draft.html }}</textarea>
+    </details>
 
     <div class="card">
       <strong>Email to community</strong>
