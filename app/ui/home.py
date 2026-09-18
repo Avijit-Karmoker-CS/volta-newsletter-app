@@ -74,11 +74,13 @@ class HomeFrame(ctk.CTkFrame):
         status_row.pack(fill="x", padx=32, pady=(8, 12))
 
         mc = mailchimp_svc.status()
-        mc_text = (
-            f"Mailchimp connected · audience {mc['audience_id'] or '(set MAILCHIMP_AUDIENCE_ID)'}"
-            if mc["configured"]
-            else "Mailchimp not configured yet — app still works in demo mode (.env)"
-        )
+        if mc.get("demo"):
+            mc_text = (
+                "Mailchimp · DEMO mode (pretend API) · audience "
+                f"{mc.get('audience_id')} · full send flow works without a real key"
+            )
+        else:
+            mc_text = f"Mailchimp · LIVE · audience {mc.get('audience_id')}"
         ctk.CTkLabel(status_row, text=mc_text, text_color="#b0aaa0").pack(anchor="w", padx=16, pady=14)
 
         draft_box = ctk.CTkFrame(self, corner_radius=12)
@@ -105,15 +107,21 @@ class HomeFrame(ctk.CTkFrame):
             state="normal" if self.current_draft else "disabled",
             width=160,
         ).pack(side="left", padx=(0, 8))
-        send_label = "Email to community…"
         ctk.CTkButton(
             btns,
-            text=send_label,
+            text="Email to community…",
             command=self._review,
             fg_color="#c45c26",
             hover_color="#a84c1e",
             state="normal" if self.current_draft and can_send(user) else "disabled",
             width=180,
+        ).pack(side="left", padx=(0, 8))
+        ctk.CTkButton(
+            btns,
+            text="Send history",
+            command=lambda: self.navigate("history"),
+            fg_color="#2f2f2f",
+            width=120,
         ).pack(side="left")
 
         self.busy = ctk.CTkLabel(self, text="", text_color="#c45c26")

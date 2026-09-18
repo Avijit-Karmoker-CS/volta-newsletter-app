@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import customtkinter as ctk
 
+from app.services import storage
 from app.services.staff import StaffMember
 from app.ui.customize import CustomizeFrame
+from app.ui.history import HistoryFrame
 from app.ui.home import HomeFrame
 from app.ui.login import LoginFrame
 from app.ui.recommendations import RecommendationsFrame
@@ -23,6 +25,8 @@ class VoltaApp(ctk.CTk):
         self.geometry("980x720")
         self.minsize(860, 640)
         self.configure(fg_color="#121212")
+
+        storage.seed_recommendations_if_empty()
 
         self.user: StaffMember | None = None
         self.container = ctk.CTkFrame(self, fg_color="transparent")
@@ -49,10 +53,12 @@ class VoltaApp(ctk.CTk):
 
     def navigate(self, screen: str, **kwargs) -> None:
         assert self.user is not None
-        if screen == "home" or kwargs.get("refresh"):
+        if screen == "home":
             self.show_home()
-            if screen == "home":
-                return
+            return
+        if kwargs.get("refresh") and screen not in {"customize", "recommendations", "review", "history"}:
+            self.show_home()
+            return
         if screen == "customize":
             self._swap(
                 CustomizeFrame(
@@ -69,6 +75,8 @@ class VoltaApp(ctk.CTk):
         elif screen == "review":
             draft = kwargs.get("draft")
             self._swap(ReviewFrame(self.container, self.user, draft, on_back=self.show_home))
+        elif screen == "history":
+            self._swap(HistoryFrame(self.container, self.user, on_back=self.show_home))
         else:
             self.show_home()
 

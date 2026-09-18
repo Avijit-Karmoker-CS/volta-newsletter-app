@@ -1,4 +1,4 @@
-"""Review + email to community via Mailchimp."""
+"""Review + email to community via Mailchimp (live or full demo)."""
 
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ class ReviewFrame(ctk.CTkFrame):
         self.html_view.pack(fill="both", expand=True, padx=12, pady=(0, 12))
         self.html_view.insert("1.0", draft.get("html", ""))
 
-        right = ctk.CTkFrame(body, corner_radius=12, width=320)
+        right = ctk.CTkFrame(body, corner_radius=12, width=340)
         right.pack(side="right", fill="y", padx=(8, 0))
         right.pack_propagate(False)
         ctk.CTkLabel(right, text="Email to community", font=ctk.CTkFont(weight="bold")).pack(
@@ -65,8 +65,8 @@ class ReviewFrame(ctk.CTkFrame):
         )
         ctk.CTkLabel(
             right,
-            text="One click selects the community list. Uncheck anyone to exclude (local review).",
-            wraplength=280,
+            text="Select who receives this issue, review the letter, then send with one click.",
+            wraplength=300,
             justify="left",
             text_color="#9a958c",
             font=ctk.CTkFont(size=12),
@@ -81,10 +81,10 @@ class ReviewFrame(ctk.CTkFrame):
             side="left"
         )
 
-        self.member_list = ctk.CTkScrollableFrame(right, height=280)
+        self.member_list = ctk.CTkScrollableFrame(right, height=260)
         self.member_list.pack(fill="both", expand=True, padx=8, pady=4)
 
-        self.status = ctk.CTkLabel(right, text="", wraplength=280, text_color="#c45c26")
+        self.status = ctk.CTkLabel(right, text="", wraplength=300, text_color="#c45c26")
         self.status.pack(anchor="w", padx=12, pady=4)
 
         send_state = "normal" if can_send(user) else "disabled"
@@ -101,12 +101,14 @@ class ReviewFrame(ctk.CTkFrame):
 
         if not can_send(user):
             self.status.configure(text="Only Bader (editor) or Matt (admin) can send.")
-
-        mc = mailchimp_svc.status()
-        if not mc["configured"]:
-            self.status.configure(
-                text="Mailchimp not configured — demo list loaded. Add keys to .env to send for real."
-            )
+        else:
+            mc = mailchimp_svc.status()
+            if mc.get("demo"):
+                self.status.configure(
+                    text="Demo Mailchimp on — send completes the full flow without a real API key."
+                )
+            else:
+                self.status.configure(text="Live Mailchimp — send will create a real campaign.")
 
         self._load_members()
 
@@ -123,10 +125,7 @@ class ReviewFrame(ctk.CTkFrame):
         self.member_vars.clear()
 
         try:
-            if mailchimp_svc.status()["configured"]:
-                self.members = mailchimp_svc.list_community_members()
-            else:
-                self.members = mailchimp_svc.demo_preview_members()
+            self.members = mailchimp_svc.list_community_members()
         except Exception as exc:  # noqa: BLE001
             self.members = mailchimp_svc.demo_preview_members()
             self.status.configure(text=f"Using demo list ({exc})")
@@ -154,16 +153,11 @@ class ReviewFrame(ctk.CTkFrame):
         storage.save_draft(self.draft)
         storage.save_html(html, self.draft.get("week_of"))
 
-        if not mailchimp_svc.status()["configured"]:
-            self.status.configure(
-                text=f"Confirmed for {len(selected)} members (demo). Configure Mailchimp to send live."
-            )
-            self.draft["status"] = "confirmed_demo"
-            storage.save_draft(self.draft)
-            return
-
         self.send_btn.configure(state="disabled")
-        self.status.configure(text="Creating Mailchimp campaign…")
+        mc = mailchimp_svc.status()
+        self.status.configure(
+            text="Creating demo Mailchimp campaign…" if mc.get("demo") else "Creating Mailchimp campaign…"
+        )
 
         def work():
             try:
@@ -171,6 +165,7 @@ class ReviewFrame(ctk.CTkFrame):
                     subject=subject,
                     html=html,
                     send_now=True,
+                    recipients=selected,
                 )
                 self.after(0, lambda: self._sent_ok(result, len(selected)))
             except Exception as exc:  # noqa: BLE001
@@ -180,15 +175,25 @@ class ReviewFrame(ctk.CTkFrame):
 
     def _sent_ok(self, result: dict, count: int) -> None:
         self.send_btn.configure(state="normal")
-        self.draft["status"] = "sent"
+        self.draft["status"] = "sent_demo" if result.get("demo") else "sent"
         self.draft["mailchimp"] = result
         storage.save_draft(self.draft)
         for r in storage.list_recommendations():
             if not r.get("included") and r.get("_id"):
                 storage.mark_recommendation_included(r["_id"], True)
-        self.status.configure(
-            text=f"Sent via Mailchimp to community list ({count} selected in review). Campaign {result.get('campaign_id')}."
-        )
+
+        cid = result.get("campaign_id")
+        if result.get("demo"):
+            self.status.configure(
+                text=(
+                    f"Demo send complete · {count} community members · campaign {cid}. "
+                    "No live email sent. Replace DEMO keys when you have a real Mailchimp API key."
+                )
+            )
+        else:
+            self.status.configure(
+                text=f"Sent via Mailchimp ({count} selected). Campaign {cid}."
+            )
 
     def _sent_fail(self, error: str) -> None:
         self.send_btn.configure(state="normal")

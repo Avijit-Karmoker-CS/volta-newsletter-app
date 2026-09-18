@@ -14,6 +14,7 @@ def data_dir() -> Path:
     root.mkdir(parents=True, exist_ok=True)
     (root / "recommendations").mkdir(exist_ok=True)
     (root / "drafts").mkdir(exist_ok=True)
+    (root / "sends").mkdir(exist_ok=True)
     return root
 
 
@@ -90,3 +91,39 @@ def save_html(html: str, week_of: str | None = None) -> Path:
     path = data_dir() / "drafts" / f"newsletter_{week}.html"
     path.write_text(html, encoding="utf-8")
     return path
+
+
+def save_send_log(result: dict) -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    cid = (result.get("campaign_id") or "unknown")[-12:]
+    path = data_dir() / "sends" / f"{stamp}_{cid}.json"
+    _write(path, result)
+    return path
+
+
+def list_send_logs() -> list[dict]:
+    items: list[dict] = []
+    for path in sorted((data_dir() / "sends").glob("*.json"), reverse=True):
+        item = _read(path, None)
+        if isinstance(item, dict):
+            item["_id"] = path.stem
+            items.append(item)
+    return items
+
+
+def seed_recommendations_if_empty() -> int:
+    """Copy bundled staff seed recommendations on first launch."""
+    rec_dir = data_dir() / "recommendations"
+    if any(rec_dir.glob("*.json")):
+        return 0
+    seed_dir = Path(__file__).resolve().parents[2] / "data" / "seed"
+    if not seed_dir.exists():
+        return 0
+    count = 0
+    for path in seed_dir.glob("*.json"):
+        payload = _read(path, None)
+        if isinstance(payload, dict):
+            dest = rec_dir / path.name
+            _write(dest, payload)
+            count += 1
+    return count
