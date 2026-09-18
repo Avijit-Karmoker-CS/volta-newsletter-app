@@ -1,0 +1,7 @@
+customtkinter>=5.2.2
+Pillow>=10.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+openai>=1.40.0
+mailchimp-marketing>=3.0.80
+beautifulsoup4>=4.12.0
