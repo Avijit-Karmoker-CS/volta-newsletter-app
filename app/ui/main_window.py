@@ -15,7 +15,7 @@ from app.ui.review import ReviewFrame
 
 
 ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("dark-blue")
+ctk.set_default_color_theme("blue")
 
 
 class VoltaApp(ctk.CTk):
@@ -29,10 +29,22 @@ class VoltaApp(ctk.CTk):
         storage.seed_recommendations_if_empty()
 
         self.user: StaffMember | None = None
-        self.container = ctk.CTkFrame(self, fg_color="transparent")
+        self.container = ctk.CTkFrame(self, fg_color="#121212")
         self.container.pack(fill="both", expand=True)
         self._frame = None
         self.show_login()
+
+        # Bring window forward on macOS (avoids “blank / behind” feel)
+        self.after(100, self._focus_window)
+
+    def _focus_window(self) -> None:
+        try:
+            self.lift()
+            self.attributes("-topmost", True)
+            self.after(200, lambda: self.attributes("-topmost", False))
+            self.focus_force()
+        except Exception:
+            pass
 
     def _swap(self, frame) -> None:
         if self._frame is not None:

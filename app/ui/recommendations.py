@@ -10,7 +10,7 @@ from app.services.staff import StaffMember
 
 class RecommendationsFrame(ctk.CTkFrame):
     def __init__(self, master, user: StaffMember, on_back):
-        super().__init__(master, fg_color="transparent")
+        super().__init__(master, fg_color="#121212")
         self.user = user
         self.on_back = on_back
 

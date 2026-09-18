@@ -14,7 +14,7 @@ from app.services.staff import StaffMember, can_send
 
 class HomeFrame(ctk.CTkFrame):
     def __init__(self, master, user: StaffMember, navigate):
-        super().__init__(master, fg_color="transparent")
+        super().__init__(master, fg_color="#121212")
         self.user = user
         self.navigate = navigate
         self.current_draft = storage.load_latest_draft()

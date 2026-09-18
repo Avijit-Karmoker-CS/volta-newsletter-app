@@ -13,7 +13,7 @@ from app.services.staff import StaffMember
 
 class CustomizeFrame(ctk.CTkFrame):
     def __init__(self, master, user: StaffMember, on_back, on_draft_ready):
-        super().__init__(master, fg_color="transparent")
+        super().__init__(master, fg_color="#121212")
         self.user = user
         self.on_back = on_back
         self.on_draft_ready = on_draft_ready

@@ -16,7 +16,7 @@ from app.services.staff import StaffMember, can_send
 
 class ReviewFrame(ctk.CTkFrame):
     def __init__(self, master, user: StaffMember, draft: dict, on_back):
-        super().__init__(master, fg_color="transparent")
+        super().__init__(master, fg_color="#121212")
         self.user = user
         self.draft = draft
         self.on_back = on_back
