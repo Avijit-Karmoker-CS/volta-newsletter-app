@@ -432,9 +432,7 @@ class ReviewScreen(Screen):
             self.draft["status"] = "sent_demo" if result.get("demo") else "sent"
             self.draft["mailchimp"] = result
             storage.save_draft(self.draft)
-            for r in storage.list_recommendations():
-                if not r.get("included") and r.get("_id"):
-                    storage.mark_recommendation_included(r["_id"], True)
+            storage.mark_draft_staff_recs_included(self.draft)
             mode = "DEMO" if result.get("demo") else "LIVE"
             status.update(
                 f"{mode} sent · {len(selected)} members · {result.get('campaign_id')} · Esc=Back"

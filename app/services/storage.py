@@ -55,20 +55,63 @@ def save_recommendation(author: str, title: str, body: str, tags: list[str] | No
         "created_at": utc_now(),
         "included": False,
     }
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
     path = data_dir() / "recommendations" / f"{stamp}_{author.lower()}.json"
     _write(path, payload)
     payload["_id"] = path.stem
     return payload
 
 
-def mark_recommendation_included(rec_id: str, included: bool = True) -> None:
+def mark_recommendation_included(
+    rec_id: str,
+    included: bool = True,
+    week_of: str | None = None,
+) -> None:
     path = data_dir() / "recommendations" / f"{rec_id}.json"
     if not path.exists():
         return
     payload = _read(path, {})
     payload["included"] = included
+    if included and week_of:
+        payload["included_week"] = week_of
+    elif not included:
+        payload.pop("included_week", None)
     _write(path, payload)
+
+
+def mark_draft_staff_recs_included(draft: dict) -> list[str]:
+    """Mark only recommendations that appear in this draft's staff_blocks.
+
+    Returns the recommendation ids that were marked. Pending recs not in
+    staff_blocks stay included=False for the next issue.
+    """
+    week = draft.get("week_of")
+    marked: list[str] = []
+    for block in draft.get("staff_blocks") or []:
+        rid = block.get("_id")
+        if not rid:
+            # Older drafts without _id: match author + title among pending
+            rid = _match_pending_rec_id(block)
+        if rid:
+            mark_recommendation_included(rid, True, week_of=week)
+            marked.append(rid)
+    return marked
+
+
+def _match_pending_rec_id(block: dict) -> str | None:
+    author = (block.get("author") or "").strip()
+    title = (block.get("title") or "").strip()
+    body = (block.get("body") or "").strip()
+    for r in list_recommendations():
+        if r.get("included"):
+            continue
+        if (
+            (r.get("author") or "").strip() == author
+            and (r.get("title") or "").strip() == title
+            and (r.get("body") or "").strip() == body
+        ):
+            return r.get("_id")
+    return None
 
 
 def save_draft(draft: dict) -> Path:

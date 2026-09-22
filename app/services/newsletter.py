@@ -40,7 +40,12 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
         )
 
     staff_blocks = [
-        {"author": r.get("author"), "title": r.get("title"), "body": r.get("body")}
+        {
+            "author": r.get("author"),
+            "title": r.get("title"),
+            "body": r.get("body"),
+            "_id": r.get("_id"),
+        }
         for r in pending[:6]
     ]
 
@@ -102,7 +107,12 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
         )
 
     staff_blocks = [
-        {"author": r.get("author"), "title": r.get("title"), "body": r.get("body")}
+        {
+            "author": r.get("author"),
+            "title": r.get("title"),
+            "body": r.get("body"),
+            "_id": r.get("_id"),
+        }
         for r in pending[:6]
     ]
 

@@ -22,7 +22,11 @@
   <div class="card">
     {% for r in recs %}
       <div class="log-item">
-        <span class="badge">{{ "in" if r.included else "open" }}</span>
+        {% if r.included %}
+        <span class="badge live">Included in {{ r.included_week or "sent" }} issue</span>
+        {% else %}
+        <span class="badge demo">Not yet included</span>
+        {% endif %}
         <strong>{{ r.author }}</strong> — {{ r.title }}
         <p class="muted">{{ r.body }}</p>
       </div>

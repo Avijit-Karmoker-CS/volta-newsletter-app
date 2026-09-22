@@ -279,9 +279,8 @@ async def review_send(request: Request):
         draft["status"] = "sent_demo" if result.get("demo") else "sent"
         draft["mailchimp"] = result
         storage.save_draft(draft)
-        for r in storage.list_recommendations():
-            if not r.get("included") and r.get("_id"):
-                storage.mark_recommendation_included(r["_id"], True)
+        # Only recs that made it into this draft's staff_blocks (pending[:6])
+        storage.mark_draft_staff_recs_included(draft)
         mode = "DEMO" if result.get("demo") else "LIVE"
         request.session["flash"] = (
             f"{mode} send complete · {len(selected)} members · campaign {result.get('campaign_id')}"
