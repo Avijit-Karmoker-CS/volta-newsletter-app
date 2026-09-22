@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NOT-BUILT — Volta Desk</title>
+  <link rel="stylesheet" href="ref.css" />
+</head>
+<body>
+  <nav>
+    <a href="../architecture.html">← Architecture diagram</a>
+    <a href="index.html">All references</a>
+  </nav>
+  <article>
+<h1>Not built — deliberate restraint</h1>
+<p>This list is <strong>not a backlog</strong>. These ideas were considered and <strong>explicitly left out</strong> so the desk follows discovery evidence, not “we could build it.”</p>
+<p>That matches Matt’s coaching (once the mentor / Matt transcripts are filled): don’t add features until the interview shows a gap.</p>
+<p><strong>Transcript status:</strong> <a href="bader-interview.html"><code>bader-interview.md</code></a>, <a href="matt-interview.html"><code>matt-interview.md</code></a>, and <a href="mentor-session.html"><code>mentor-session.md</code></a> are still placeholders with no dialogue body. Items below name the intended source file and the reason as established in product discovery. <strong>Verbatim speaker lines are marked PENDING</strong> — do not invent quotes. After paste, replace each PENDING with a real line from that file (same grounding rule as <a href="policy-rationale.html"><code>policy-rationale.md</code></a>).</p>
+<hr>
+<h2 id="1-weekly-or-any-more-frequent-by-default-cadence">1. Weekly (or any more-frequent-by-default) cadence</h2>
+<p><strong>Left out:</strong> Defaulting to weekly or biweekly sends, or any UI/skill nudge that pushes “send more often.”</p>
+<p><strong>What exists instead:</strong> Monthly as the spine (<a href="../CLAUDE.html"><code>CLAUDE.md</code></a> cadence). An optional, manual, opt-in <strong>flash update</strong> for genuinely time-sensitive news only — never a replacement for the monthly issue.</p>
+<p><strong>Why:</strong> Bader rejected weekly twice — including under a generous hypothetical with unlimited content — citing subscriber fatigue and Volta’s monthly event structure, not his own prep time.</p>
+<p><strong>Source:</strong> <a href="transcripts/bader-interview.html"><code>references/transcripts/bader-interview.md</code></a>  </p>
+<p><strong>Verbatim line:</strong> PENDING — paste transcript, then cite the two weekly-rejection moments here.</p>
+<hr>
+<h2 id="2-built-in-analytics-dashboard-opens-clicks-unsubscribes">2. Built-in analytics dashboard (opens / clicks / unsubscribes)</h2>
+<p><strong>Left out:</strong> Any opens/clicks/unsubscribe dashboard or analytics product inside volta-desk (or a parallel “newsletter metrics” surface).</p>
+<p><strong>What exists instead:</strong> Outcome notes Bader actually reports (<code>outcomes/</code>), after a send. Mailchimp remains the analytics system of record.</p>
+<p><strong>Why:</strong> Bader already uses Mailchimp’s own analytics and is satisfied with it. Building a second dashboard would be duplicative and out of scope.</p>
+<p><strong>Source:</strong> <a href="transcripts/bader-interview.html"><code>references/transcripts/bader-interview.md</code></a>  </p>
+<p><strong>Verbatim line:</strong> PENDING — paste transcript, then cite the Mailchimp-analytics satisfaction moment here.</p>
+<hr>
+<h2 id="3-direct-mailchimp-replacement-sending-audience-management">3. Direct Mailchimp replacement (sending + audience management)</h2>
+<p><strong>Left out:</strong> Replacing Mailchimp for live list send, audience/list management, or becoming the ESP.</p>
+<p><strong>What exists instead:</strong> <code>send-to-mailchimp</code> prepares a campaign via Mailchimp’s API (or demo mode). The desk drafts and gates content; Mailchimp is the only path that emails real subscribers.</p>
+<p><strong>Why:</strong> Matt was explicit that Mailchimp stays unless there is a real reason to switch. No such reason was established for this system.</p>
+<p><strong>Source:</strong> <a href="transcripts/matt-interview.html"><code>references/transcripts/matt-interview.md</code></a>  </p>
+<p><strong>Verbatim line:</strong> PENDING — paste transcript, then cite the “Mailchimp stays” moment here.</p>
+<hr>
+<h2 id="4-automated-cadence-experiments">4. Automated cadence experiments</h2>
+<p><strong>Left out:</strong> Automated A/B or scheduled experiments that vary send frequency by default, or a “test weekly vs monthly” feature shipped without a named hypothesis.</p>
+<p><strong>What exists instead:</strong> Fixed monthly default. Frequency changes only by deliberate configuration / human decision — not an always-on experiment engine.</p>
+<p><strong>Why:</strong> Matt raised the idea of testing frequency by hypothesis, but also stated the restraint rule: don’t add features until the interview shows a gap. There is no specific frequency hypothesis to test yet, so this stays deliberately unbuilt.</p>
+<p><strong>Sources:</strong>  </p>
+<ul>
+<li>Idea / hypothesis framing: <a href="transcripts/matt-interview.html"><code>references/transcripts/matt-interview.md</code></a>  </li>
+<li>Restraint / don’t-build-until-gap: <a href="transcripts/mentor-session.html"><code>references/transcripts/mentor-session.md</code></a> (discovery framework coaching) and/or <a href="matt-interview.html"><code>matt-interview.md</code></a> once pasted  </li>
+</ul>
+<p><strong>Verbatim lines:</strong> PENDING — paste transcripts, then cite (1) the cadence-experiment idea and (2) the “don’t add features until there’s a gap” rule here.</p>
+<hr>
+<h2 id="how-to-use-this-file">How to use this file</h2>
+<ul>
+<li>Reviewers: if something “missing” is on this list, that is intentional.</li>
+<li>Builders: do not implement these without a new transcript-backed gap and an update to this file + <a href="policy-rationale.html"><code>policy-rationale.md</code></a>.</li>
+<li>After transcripts are pasted: fill every PENDING with a real quote or close paraphrase and leave the rest of the rationale intact.</li>
+</ul>
+  </article>
+</body>
+</html>

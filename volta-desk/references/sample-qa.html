@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>sample-qa — Volta Desk</title>
+  <link rel="stylesheet" href="ref.css" />
+</head>
+<body>
+  <nav>
+    <a href="../architecture.html">← Architecture diagram</a>
+    <a href="index.html">All references</a>
+  </nav>
+  <article>
+<h1>Sample Q&amp;A — the folder answering for itself</h1>
+<p>These three questions were answered by <strong>opening files in this tree and quoting them</strong>, not by recalling a chat.  </p>
+<p>Perspective tags: <strong>Rishabh</strong> (product / “show me the wiring”), <strong>Matt</strong> (buyer / “does input count / do I have to trust you”).</p>
+<p>Honest gap: <a href="transcripts/*.html"><code>references/transcripts/*.md</code></a> are still placeholders, so where a <em>speaker</em> line is needed, this doc cites what the folder actually says today (<code>UNCITED</code> / <code>PENDING</code>) rather than inventing Bader’s or Matt’s words.</p>
+<hr>
+<h2 id="1-why-does-this-default-to-monthly-instead-of-weekly">1. “Why does this default to monthly instead of weekly?”</h2>
+<p><strong>Likely asker:</strong> Rishabh (design choice / fidelity to discovery)</p>
+<h3 id="files-opened">Files opened</h3>
+<p>1. <a href="../CLAUDE.html"><code>CLAUDE.md</code></a></p>
+<p>2. <a href="NOT-BUILT.html"><code>references/NOT-BUILT.md</code></a></p>
+<p>3. <a href="policy-rationale.html"><code>references/policy-rationale.md</code></a></p>
+<p>4. <a href="transcripts/bader-interview.html"><code>references/transcripts/bader-interview.md</code></a></p>
+<h3 id="what-the-folder-says">What the folder says</h3>
+<p><strong>Enforced rule</strong> — from <a href="../CLAUDE.html"><code>CLAUDE.md</code></a> (lines 7–9):</p>
+<blockquote><p>- Default cadence is <strong>monthly</strong>. That is the spine of this system.  </p></blockquote>
+<blockquote><p>- Never default to, suggest, or nudge toward weekly or biweekly sends.  </p></blockquote>
+<blockquote><p>- A <strong>flash update</strong> is an optional, separate, cheap action for genuinely time-sensitive news only — never a replacement for the monthly issue, and never a prompt to send more often.</p></blockquote>
+<p><strong>Deliberate omission</strong> — from <a href="NOT-BUILT.html"><code>references/NOT-BUILT.md</code></a> (lines 11–20):</p>
+<blockquote><p>## 1. Weekly (or any more-frequent-by-default) cadence  </p></blockquote>
+<blockquote><p>…  </p></blockquote>
+<blockquote><p><strong>Why:</strong> Bader rejected weekly twice — including under a generous hypothetical with unlimited content — citing subscriber fatigue and Volta’s monthly event structure, not his own prep time.  </p></blockquote>
+<blockquote><p><strong>Source:</strong> <a href="transcripts/bader-interview.html"><code>references/transcripts/bader-interview.md</code></a>  </p></blockquote>
+<blockquote><p><strong>Verbatim line:</strong> PENDING — paste transcript, then cite the two weekly-rejection moments here.</p></blockquote>
+<p><strong>Citation honesty</strong> — from <a href="policy-rationale.html"><code>references/policy-rationale.md</code></a> (lines 27–30):</p>
+<blockquote><p>### Rule: Default cadence is monthly. That is the spine of this system.  </p></blockquote>
+<blockquote><p>- <strong>Citation:</strong> UNCITED — no line available in <a href="bader-interview.html"><code>bader-interview.md</code></a> (or others).  </p></blockquote>
+<blockquote><p>- <strong>Expected source (once pasted):</strong> Bader rejecting weekly / affirming monthly — do not fill until the transcript has that moment.</p></blockquote>
+<p><strong>Transcript file as opened</strong> — from <a href="transcripts/bader-interview.html"><code>references/transcripts/bader-interview.md</code></a> (lines 1–3):</p>
+<blockquote><p># Bader interview — PLACEHOLDER (raw transcript not available)  </p></blockquote>
+<blockquote><p><strong>STATUS:</strong> Raw transcript text was <strong>not</strong> present in this repository or in this agent session.  </p></blockquote>
+<blockquote><p>Do <strong>not</strong> treat anything below as Bader’s words.</p></blockquote>
+<h3 id="answer-in-one-breath">Answer in one breath</h3>
+<p>The system defaults to monthly because <a href="../CLAUDE.html"><code>CLAUDE.md</code></a> hard-codes it and <a href="NOT-BUILT.html"><code>NOT-BUILT.md</code></a> records weekly-by-default as rejected. The <em>interview</em> line that should sit under that decision is not in the folder yet — <a href="policy-rationale.html"><code>policy-rationale.md</code></a> and <a href="bader-interview.html"><code>bader-interview.md</code></a> say so out loud. That is the folder being checkable, not a sales answer.</p>
+<hr>
+<h2 id="2-how-do-i-know-my-suggestion-won-t-just-disappear">2. “How do I know my suggestion won’t just disappear?”</h2>
+<p><strong>Likely asker:</strong> Matt (leadership tip / “does my input actually count”)</p>
+<h3 id="files-opened">Files opened</h3>
+<p>1. <a href="for-matt.html"><code>references/for-matt.md</code></a></p>
+<p>2. <a href="../sent/2026-09-monthly.html"><code>sent/2026-09-monthly.md</code></a></p>
+<p>3. <code>logs/activity.log</code></p>
+<p>4. <a href="../CLAUDE.html"><code>CLAUDE.md</code></a> (provability)</p>
+<h3 id="what-the-folder-says">What the folder says</h3>
+<p><strong>Stated buyer concern</strong> — from <a href="for-matt.html"><code>references/for-matt.md</code></a> (lines 13, 19):</p>
+<blockquote><p>…leaving a trail so a tip from leadership isn’t lost in a chat.  </p></blockquote>
+<blockquote><p>…  </p></blockquote>
+<blockquote><p>The risk it is meant to cut is the opposite problem: someone on the team flags something important, and it quietly never shows up in an issue, with no record of why.</p></blockquote>
+<p><strong>A tip that made the issue</strong> — from <a href="../sent/2026-09-monthly.html"><code>sent/2026-09-monthly.md</code></a> (Sources, lines 47–48):</p>
+<blockquote><p>- <a href="../inbox/2026-09-22-matt-bridge-priority.html"><code>inbox/2026-09-22-matt-bridge-priority.md</code></a> — approved leadership priority to keep Bridge launch visible  </p></blockquote>
+<blockquote><p>- <a href="../inbox/2026-09-20-rishabh-founder-pilot.html"><code>inbox/2026-09-20-rishabh-founder-pilot.md</code></a> — approved founder pilot win (no company/dollars)</p></blockquote>
+<p><strong>A tip that did not vanish when blocked</strong> — from <a href="../sent/2026-09-monthly.html"><code>sent/2026-09-monthly.md</code></a> (Waiting on consent, lines 50–52):</p>
+<blockquote><p>## Waiting on consent  </p></blockquote>
+<blockquote><p>- <a href="internal-signals/2026-09-15-meeting-residency-quote.html"><code>internal-signals/2026-09-15-meeting-residency-quote.md</code></a> — <code>not_requested</code> (founder quote; internal until founder approves public use)</p></blockquote>
+<p><strong>Audit trail of Matt’s Bridge tip moving through consent</strong> — from <code>logs/activity.log</code> (line 2):</p>
+<blockquote><p><code>2026-09-22T13:39:38-03:00 | skill=request-consent | files=inbox/2026-09-22-matt-bridge-priority.md | Bridge tip not_requested→pending→approved</code></p></blockquote>
+<p><strong>And of a build that kept waiting items visible</strong> — from <code>logs/activity.log</code> (line 8):</p>
+<blockquote><p><code>2026-09-22T13:45:10-03:00 | skill=build-newsletter | files=drafts/2026-09-monthly.md | Proof monthly build: 4 approved in, residency quote waiting</code></p></blockquote>
+<p><strong>Provability rule</strong> — from <a href="../CLAUDE.html"><code>CLAUDE.md</code></a> (lines 35–36):</p>
+<blockquote><p>- Every action must be logged and produce real artifacts (files, status changes, draft outputs).  </p></blockquote>
+<blockquote><p>- Prefer writing proof to disk over asserting that work was done.</p></blockquote>
+<h3 id="answer-in-one-breath">Answer in one breath</h3>
+<p>A suggestion becomes a file; if it isn’t in the letter, it still shows under <strong>Waiting on consent</strong> or in <code>logs/activity.log</code>. Matt’s Bridge tip is on the Sources list of <a href="../sent/2026-09-monthly.html"><code>sent/2026-09-monthly.md</code></a> and in the activity log as <code>not_requested→pending→approved</code>. Disappearing silently would violate how this folder is written.</p>
+<hr>
+<h2 id="3-what-stops-this-from-becoming-another-thing-i-have-to-trust-blindly">3. “What stops this from becoming another thing I have to trust blindly?”</h2>
+<p><strong>Likely asker:</strong> Rishabh (verify the mechanism) — also what Matt needs for spend confidence</p>
+<h3 id="files-opened">Files opened</h3>
+<p>1. <code>.claude/hooks/guard-consent.py</code></p>
+<p>2. <a href="../PROOF.html"><code>PROOF.md</code></a> (Guard section)</p>
+<p>3. <code>logs/activity.log</code></p>
+<p>4. <a href="compliance-note.html"><code>references/compliance-note.md</code></a></p>
+<p>5. <a href="for-matt.html"><code>references/for-matt.md</code></a> (proof pointer)</p>
+<h3 id="what-the-folder-says">What the folder says</h3>
+<p><strong>Structural block (not a promise)</strong> — from <code>.claude/hooks/guard-consent.py</code> (lines 68–71):</p>
+<blockquote><p>if status != &quot;approved&quot;:  </p></blockquote>
+<blockquote><p>    errors.append(  </p></blockquote>
+<blockquote><p>        f&quot;Guard blocked: &#x27;{rel}&#x27; has consent_status=&#x27;{status or &#x27;missing&#x27;}&#x27; &quot;  </p></blockquote>
+<blockquote><p>        f&quot;(must be &#x27;approved&#x27; before anything is treated as ready for Mailchimp).&quot;  </p></blockquote>
+<blockquote><p>    )</p></blockquote>
+<p><strong>That block actually ran</strong> — from <a href="../PROOF.html"><code>PROOF.md</code></a> (lines 238–241):</p>
+<blockquote><p>```bash  </p></blockquote>
+<blockquote><p>$ python3 volta-desk/.claude/hooks/guard-consent.py --check /tmp/volta-proof-bad-sent.md  </p></blockquote>
+<blockquote><p>Guard blocked: &#x27;internal-signals/2026-09-15-meeting-residency-quote.md&#x27; has consent_status=&#x27;not_requested&#x27; (must be &#x27;approved&#x27; before anything is treated as ready for Mailchimp).  </p></blockquote>
+<blockquote><p>guard_exit=2  </p></blockquote>
+<blockquote><p>```</p></blockquote>
+<p><strong>Logged in the audit trail</strong> — from <code>logs/activity.log</code> (line 9):</p>
+<blockquote><p><code>2026-09-22T13:45:11-03:00 | skill=build-newsletter | files=sent/ (blocked) | Guard blocked finalize referencing not_requested residency quote</code></p></blockquote>
+<p><strong>CASL / subscriber trust</strong> — from <a href="compliance-note.html"><code>references/compliance-note.md</code></a> (full body):</p>
+<blockquote><p>This desk never stores, processes, or sends to a real subscriber’s email address. The audience list and every live send stay in Mailchimp alone; volta-desk only produces a reviewed draft (and, when configured, hands campaign content to Mailchimp’s API without keeping a local copy of the list). Volta’s existing CASL posture is unchanged, because nothing in this system touches subscriber data.</p></blockquote>
+<p><strong>Where to re-check anytime</strong> — from <a href="for-matt.html"><code>references/for-matt.md</code></a> (lines 25–27):</p>
+<blockquote><p>A full month was run end to end with real files and console output in <a href="../PROOF.html"><code>PROOF.md</code></a>. Ongoing runs leave an audit trail in <code>logs/activity.log</code> — which skill ran, what it touched, what happened — so you can check whether input actually counted without taking anyone’s word for it.</p></blockquote>
+<h3 id="answer-in-one-breath">Answer in one breath</h3>
+<p>You don’t have to trust a pitch: open <a href="../PROOF.html"><code>PROOF.md</code></a> and <code>logs/activity.log</code> for a real Guard deny (<code>exit 2</code>), open <code>guard-consent.py</code> for the code that emits it, open <a href="compliance-note.html"><code>compliance-note.md</code></a> for subscriber-data scope, and open <a href="policy-rationale.html"><code>policy-rationale.md</code></a> / transcripts for whether a rule is actually cited yet. Blind trust is what this folder is built to make unnecessary.</p>
+<hr>
+<h2 id="how-to-re-run-this-check">How to re-run this check</h2>
+<p>1. Ask the same three questions against a fresh checkout.  </p>
+<p>2. Prefer <code>Read</code> / open of the paths named above over chat memory.  </p>
+<p>3. After interview transcripts are pasted, Q1’s second click should move from <code>PENDING</code> / <code>UNCITED</code> to a real <code>Bader:</code> line in <a href="transcripts/bader-interview.html"><code>references/transcripts/bader-interview.md</code></a> — update <a href="policy-rationale.html"><code>policy-rationale.md</code></a> and this file when that happens.</p>
+  </article>
+</body>
+</html>

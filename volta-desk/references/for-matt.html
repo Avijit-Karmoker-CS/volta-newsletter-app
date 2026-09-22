@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>for-matt — Volta Desk</title>
+  <link rel="stylesheet" href="ref.css" />
+</head>
+<body>
+  <nav>
+    <a href="../architecture.html">← Architecture diagram</a>
+    <a href="index.html">All references</a>
+  </nav>
+  <article>
+<h1>For Matt — short buyer brief</h1>
+<p>Phone-length answers to the economic questions. Not a pitch.</p>
+<h2 id="what-does-this-cost-to-run">What does this cost to run?</h2>
+<p>Nothing beyond Claude or Cursor, which Bader already uses. No hosting bill, no new SaaS subscription, no server to keep alive. The desk is a folder on disk plus the tools he already opens for work.</p>
+<h2 id="what-does-it-replace">What does it replace?</h2>
+<p>Nothing that already sends email. Mailchimp still sends to the community.</p>
+<p>What it takes over is the messy middle: deciding what is allowed in this month’s letter, getting a clear yes before someone’s story or internal note is used, and leaving a trail so a tip from leadership isn’t lost in a chat.</p>
+<h2 id="what-risk-does-it-introduce">What risk does it introduce?</h2>
+<p>None to subscriber data. This system never holds or emails the audience list — see <a href="compliance-note.html"><code>references/compliance-note.md</code></a>. Mailchimp stays the only place that knows subscribers and the only thing that sends.</p>
+<p>The risk it is meant to cut is the opposite problem: someone on the team flags something important, and it quietly never shows up in an issue, with no record of why.</p>
+<h2 id="what-did-we-deliberately-not-build-and-why">What did we deliberately not build, and why?</h2>
+<p>Things that sounded useful but the interviews said not to ship yet — weekly-by-default sends, a second analytics dashboard, replacing Mailchimp, automated frequency experiments. Reasons are in <a href="NOT-BUILT.html"><code>references/NOT-BUILT.md</code></a>.</p>
+<h2 id="where-s-the-proof-this-isn-t-just-a-pitch">Where’s the proof this isn’t just a pitch?</h2>
+<p>A full month was run end to end with real files and console output in <a href="../PROOF.html"><code>PROOF.md</code></a>. Ongoing runs leave an audit trail in <code>logs/activity.log</code> — which skill ran, what it touched, what happened — so you can check whether input actually counted without taking anyone’s word for it.</p>
+  </article>
+</body>
+</html>

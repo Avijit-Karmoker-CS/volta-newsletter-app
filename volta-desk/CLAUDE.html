@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CLAUDE — Volta Desk</title>
+  <link rel="stylesheet" href="references/ref.css" />
+</head>
+<body>
+  <nav>
+    <a href="architecture.html">← Architecture diagram</a>
+    <a href="references/index.html">All references</a>
+  </nav>
+  <article>
+<h1>Volta Desk — always-on rules</h1>
+<p>Operate this folder as Bader’s newsletter desk inside Claude/Cursor. Do not modify or depend on the FastAPI <code>app/</code> tree. Follow these rules on every action.</p>
+<h2 id="cadence">Cadence</h2>
+<ul>
+<li>Default cadence is <strong>monthly</strong>. That is the spine of this system.</li>
+<li>Never default to, suggest, or nudge toward weekly or biweekly sends.</li>
+<li>A <strong>flash update</strong> is an optional, separate, cheap action for genuinely time-sensitive news only — never a replacement for the monthly issue, and never a prompt to send more often.</li>
+</ul>
+<h2 id="consent-gate">Consent gate</h2>
+<ul>
+<li>Nothing enters a draft without <code>consent_status: approved</code>.</li>
+<li>Applies to founder stories and internal Volta data (attendance, meeting notes, program launches, etc.).</li>
+<li>Pending, not_requested, declined, or missing consent → exclude. Do not soft-include or “flag for later inside the draft.”</li>
+</ul>
+<h2 id="grounding">Grounding</h2>
+<ul>
+<li>Every claim in a draft must trace to a real file under <code>inbox/</code> or <code>internal-signals/</code>.</li>
+<li>No invented statistics, no paraphrased-into-existence claims, no vague filler where a specific fact should be.</li>
+<li>If a fact has no source file, omit it.</li>
+</ul>
+<h2 id="no-time-savings-claims">No time-savings claims</h2>
+<ul>
+<li>Never claim this system saves time (e.g. “cuts prep from X hours to Y minutes”) in generated copy, docs, comments, or skill text.</li>
+</ul>
+<h2 id="send-path">Send path</h2>
+<ul>
+<li>Mailchimp is the only thing that emails real subscribers.</li>
+<li>This system drafts and prepares content. It never sends to a live list itself.</li>
+<li>Do not build or imply an opens/clicks/unsubscribes analytics dashboard — Mailchimp owns that.</li>
+</ul>
+<h2 id="provability">Provability</h2>
+<ul>
+<li>Every action must be logged and produce real artifacts (files, status changes, draft outputs).</li>
+<li>Prefer writing proof to disk over asserting that work was done.</li>
+</ul>
+<p>Policy rationale (who said what): <a href="references/policy-rationale.html"><code>references/policy-rationale.md</code></a>.</p>
+  </article>
+</body>
+</html>

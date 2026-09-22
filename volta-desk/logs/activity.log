@@ -1,0 +1,11 @@
+2026-09-22T13:39:38-03:00 | skill=build-newsletter | files=drafts/2026-09-monthly.md | Monthly rebuild after Bridge consent approved
+2026-09-22T13:39:38-03:00 | skill=request-consent | files=inbox/2026-09-22-matt-bridge-priority.md | Bridge tip not_requested→pending→approved
+2026-09-22T13:39:39-03:00 | skill=log-outcome | files=outcomes/2026-09-monthly.md | Outcome note recorded; no metrics invented
+2026-09-22T13:39:39-03:00 | skill=build-newsletter | files=sent/2026-09-monthly.md | Finalize blocked by Guard: pending founder pilot referenced
+2026-09-22T13:39:39-03:00 | skill=build-newsletter | files=/Users/avijit.karmoker/Desktop/My MacBook/Volta/volta-newsletter-app/volta-desk/drafts/2026-09-monthly.md | Write wrote 2026-09-monthly.md
+2026-09-22T13:41:53-03:00 | skill=send-to-mailchimp | files=sent/2026-09-monthly.md,logs/2026-09-22-send-to-mailchimp-2026-09-monthly.md | Demo Mailchimp send complete — no live email left the building. Swap DEMO keys for a real MAILCHIMP_API_KEY when ready.
+2026-09-22T13:45:00-03:00 | skill=request-consent | files=inbox/2026-09-20-rishabh-founder-pilot.md | pending→approved (Jane); residency quote left not_requested for Guard proof
+2026-09-22T13:45:10-03:00 | skill=build-newsletter | files=drafts/2026-09-monthly.md | Proof monthly build: 4 approved in, residency quote waiting
+2026-09-22T13:45:11-03:00 | skill=build-newsletter | files=sent/ (blocked) | Guard blocked finalize referencing not_requested residency quote
+2026-09-22T13:45:17-03:00 | skill=send-to-mailchimp | files=sent/2026-09-monthly.md,logs/2026-09-22-send-to-mailchimp-2026-09-monthly.md | Demo Mailchimp send complete — no live email left the building. Swap DEMO keys for a real MAILCHIMP_API_KEY when ready.
+2026-09-22T13:45:17-03:00 | skill=log-outcome | files=outcomes/2026-09-monthly.md | Proof: demo send confirmed; no post-send figures provided

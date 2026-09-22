@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PROOF — Volta Desk</title>
+  <link rel="stylesheet" href="references/ref.css" />
+</head>
+<body>
+  <nav>
+    <a href="architecture.html">← Architecture diagram</a>
+    <a href="references/index.html">All references</a>
+  </nav>
+  <article>
+<h1>Volta Desk — monthly proof run</h1>
+<p><strong>When:</strong> 2026-09-22  </p>
+<p><strong>Operator role:</strong> Bader’s monthly issue, end to end  </p>
+<p><strong>Mode:</strong> <code>DEMO_MODE=true</code> (no live email)</p>
+<p>This document pastes <strong>real file contents and console output</strong> from one complete run. It is not a description of what would happen.</p>
+<hr>
+<h2 id="1-starting-state-inbox-and-internal-signals">1. Starting state — <code>inbox/</code> and <code>internal-signals/</code></h2>
+<h3 id="ls-volta-desk-inbox"><code>ls volta-desk/inbox/</code></h3>
+<pre><code>2026-09-18-laura-ai-showcase-recap.md
+2026-09-20-rishabh-founder-pilot.md
+2026-09-22-matt-bridge-priority.md</code></pre>
+<h3 id="inbox-2026-09-18-laura-ai-showcase-recap-md"><a href="inbox/2026-09-18-laura-ai-showcase-recap.html"><code>inbox/2026-09-18-laura-ai-showcase-recap.md</code></a></h3>
+<pre><code>---
+author: Laura
+consent_status: approved
+date: 2026-09-18
+tags: [events, community]
+---
+Flag the AI Showcase recap for this month&#x27;s issue — strong turnout, good for community visibility. Keep it short; link to the event page if we have one.</code></pre>
+<h3 id="inbox-2026-09-20-rishabh-founder-pilot-md-before-consent"><a href="inbox/2026-09-20-rishabh-founder-pilot.html"><code>inbox/2026-09-20-rishabh-founder-pilot.md</code></a> (before consent)</h3>
+<pre><code>---
+author: Rishabh
+consent_status: pending
+date: 2026-09-20
+tags: [founder, wins]
+consent_contact: jane@example-startup.ca
+---
+Founder story lead: a resident closed a first paid pilot with a local enterprise. Do not name the company or dollar amount until Jane confirms wording. Ask her before any draft includes this.</code></pre>
+<h3 id="inbox-2026-09-22-matt-bridge-priority-md"><a href="inbox/2026-09-22-matt-bridge-priority.html"><code>inbox/2026-09-22-matt-bridge-priority.md</code></a></h3>
+<pre><code>---
+author: Matt
+consent_status: approved
+date: 2026-09-22
+tags: [programs, bridge, priority]
+---
+Keep the Bridge program launch visible in this issue. Leadership priority — public wording still needs a yes before we describe cohort details.
+
+## Consent log
+
+- 2026-09-22 — Requested from Matt (leadership / program owner). Status set to `pending`. Models Bader’s hand-ask as a tracked desk action.
+- 2026-09-22 — Response recorded: **approved**. Matt confirmed Bridge launch may appear in the monthly issue; still no cohort details beyond what this file states.</code></pre>
+<h3 id="ls-volta-desk-internal-signals"><code>ls volta-desk/internal-signals/</code></h3>
+<pre><code>2026-09-12-attendance-ai-showcase.md
+2026-09-15-meeting-residency-quote.md</code></pre>
+<h3 id="internal-signals-2026-09-12-attendance-ai-showcase-md"><a href="internal-signals/2026-09-12-attendance-ai-showcase.html"><code>internal-signals/2026-09-12-attendance-ai-showcase.md</code></a></h3>
+<pre><code>---
+author: Amy
+consent_status: approved
+date: 2026-09-12
+kind: attendance
+event: AI Showcase
+source_note: Event ops tally · demo seed
+---
+AI Showcase attendance (internal): 47 registered, 41 checked in. Use only the checked-in figure if this appears in the letter. No individual names without separate consent.</code></pre>
+<h3 id="internal-signals-2026-09-15-meeting-residency-quote-md-left-unapproved-on-purpos"><a href="internal-signals/2026-09-15-meeting-residency-quote.html"><code>internal-signals/2026-09-15-meeting-residency-quote.md</code></a> (left unapproved on purpose)</h3>
+<pre><code>---
+author: Laura
+consent_status: not_requested
+date: 2026-09-15
+kind: meeting_note
+topic: residency check-in
+source_note: Call notes · demo seed
+---
+Residency check-in note: one founder described the space as “where we finally stopped building in isolation.” Quote is internal until the founder approves public use. Do not attribute by name without consent.</code></pre>
+<p><strong>Consent snapshot at start of this proof month</strong></p>
+<table><thead><tr><th>File</th><th>consent_status</th></tr></thead><tbody>
+<tr><td>Laura AI Showcase tip</td><td><code>approved</code></td></tr>
+<tr><td>Rishabh founder pilot</td><td><code>pending</code></td></tr>
+<tr><td>Matt Bridge priority</td><td><code>approved</code></td></tr>
+<tr><td>Amy attendance signal</td><td><code>approved</code></td></tr>
+<tr><td>Residency quote signal</td><td><code>not_requested</code> ← left this way for Guard proof</td></tr>
+</tbody></table>
+<hr>
+<h2 id="2-request-consent-approve-the-pending-item">2. <code>request-consent</code> — approve the pending item</h2>
+<p>Skill: <code>request-consent</code>  </p>
+<p>Target: <a href="inbox/2026-09-20-rishabh-founder-pilot.html"><code>inbox/2026-09-20-rishabh-founder-pilot.md</code></a>  </p>
+<p>Action: <code>pending</code> → <code>approved</code> (Jane confirmed; still no company/dollars)</p>
+<h3 id="file-after-request-consent">File after request-consent</h3>
+<pre><code>---
+author: Rishabh
+consent_status: approved
+date: 2026-09-20
+tags: [founder, wins]
+consent_contact: jane@example-startup.ca
+---
+Founder story lead: a resident closed a first paid pilot with a local enterprise. Do not name the company or dollar amount until Jane confirms wording. Ask her before any draft includes this.
+
+## Consent log
+
+- 2026-09-22 — Request already open (`pending`) to Jane at jane@example-startup.ca.
+- 2026-09-22 — Response recorded: **approved**. Jane confirmed the pilot win may appear. Still no company name or dollar amount in any draft.</code></pre>
+<h3 id="journal-line-written">Journal line written</h3>
+<pre><code>2026-09-22T13:45:00-03:00 | skill=request-consent | files=inbox/2026-09-20-rishabh-founder-pilot.md | pending→approved (Jane); residency quote left not_requested for Guard proof</code></pre>
+<p>Residency quote remains <code>not_requested</code> (still on disk as in step 1).</p>
+<hr>
+<h2 id="3-build-newsletter-real-generated-draft">3. <code>build-newsletter</code> — real generated draft</h2>
+<p>Skill: <code>build-newsletter</code> (monthly)  </p>
+<p>Output path at generation time: <a href="drafts/2026-09-monthly.html"><code>drafts/2026-09-monthly.md</code></a></p>
+<h3 id="draft-as-generated-before-send">Draft as generated (before send)</h3>
+<pre><code>---
+type: monthly
+period: 2026-09
+built: 2026-09-22
+skill: build-newsletter
+proof_run: true
+---
+
+# Volta newsletter — Month of September 2026
+
+## Community
+
+### AI Showcase recap
+
+Volta’s AI Showcase drew strong community turnout. **41 people checked in.**
+
+*(Sources: Laura’s staff tip for a short recap; Amy’s attendance tally for the checked-in figure only.)*
+
+## Programs
+
+### Bridge launch
+
+Keep the Bridge program launch visible this month. Volta Bridge is live as a leadership priority for this issue.
+
+*(Source: Matt’s approved tip. No cohort details — none are stated in the source file.)*
+
+## Member wins
+
+### First paid pilot
+
+A Volta resident closed a first paid pilot with a local enterprise.
+
+*(Source: Rishabh’s tip, approved by Jane. No company name and no dollar amount — the source forbids both until further notice.)*
+
+---
+
+## Sources
+
+- `inbox/2026-09-18-laura-ai-showcase-recap.md` — staff tip to include a short AI Showcase recap
+- `internal-signals/2026-09-12-attendance-ai-showcase.md` — checked-in count (41)
+- `inbox/2026-09-22-matt-bridge-priority.md` — approved leadership priority to keep Bridge launch visible
+- `inbox/2026-09-20-rishabh-founder-pilot.md` — approved founder pilot win (no company/dollars)
+
+## Waiting on consent
+
+- `internal-signals/2026-09-15-meeting-residency-quote.md` — `not_requested` (founder quote; internal until founder approves public use)</code></pre>
+<h3 id="journal-line-written">Journal line written</h3>
+<pre><code>2026-09-22T13:45:10-03:00 | skill=build-newsletter | files=drafts/2026-09-monthly.md | Proof monthly build: 4 approved in, residency quote waiting</code></pre>
+<hr>
+<h2 id="4-guard-hook-prove-it-blocks-an-unapproved-item">4. Guard Hook — prove it blocks an unapproved item</h2>
+<p>Left unapproved: <a href="internal-signals/2026-09-15-meeting-residency-quote.html"><code>internal-signals/2026-09-15-meeting-residency-quote.md</code></a> (<code>not_requested</code>).</p>
+<p>Deliberately tried to finalize a draft that <strong>references that quote as a Source</strong> (as if ready for Mailchimp).</p>
+<h3 id="bad-payload-used-for-the-test">Bad payload used for the test</h3>
+<pre><code>---
+type: monthly
+period: 2026-09
+---
+
+# Bad finalize — includes unapproved quote
+
+A founder described the space as “where we finally stopped building in isolation.”
+
+## Sources
+
+- `internal-signals/2026-09-15-meeting-residency-quote.md`
+- `inbox/2026-09-18-laura-ai-showcase-recap.md`
+
+## Waiting on consent
+
+(empty — wrongly treated unapproved quote as ready)</code></pre>
+<h3 id="command-real-stderr-exit">Command + real stderr / exit</h3>
+<pre><code>$ python3 volta-desk/.claude/hooks/guard-consent.py --check /tmp/volta-proof-bad-sent.md
+Guard blocked: &#x27;internal-signals/2026-09-15-meeting-residency-quote.md&#x27; has consent_status=&#x27;not_requested&#x27; (must be &#x27;approved&#x27; before anything is treated as ready for Mailchimp).
+guard_exit=2</code></pre>
+<h3 id="simulated-pretooluse-write-sent-same-block">Simulated PreToolUse Write → <code>sent/</code> (same block)</h3>
+<pre><code>Guard blocked: &#x27;internal-signals/2026-09-15-meeting-residency-quote.md&#x27; has consent_status=&#x27;not_requested&#x27; (must be &#x27;approved&#x27; before anything is treated as ready for Mailchimp).
+{&quot;hookSpecificOutput&quot;: {&quot;hookEventName&quot;: &quot;PreToolUse&quot;, &quot;permissionDecision&quot;: &quot;deny&quot;, &quot;permissionDecisionReason&quot;: &quot;Guard blocked: &#x27;internal-signals/2026-09-15-meeting-residency-quote.md&#x27; has consent_status=&#x27;not_requested&#x27; (must be &#x27;approved&#x27; before anything is treated as ready for Mailchimp).&quot;}}
+pretool_exit=2</code></pre>
+<h3 id="same-guard-on-the-real-monthly-draft-sources-are-all-approved">Same Guard on the real monthly draft (Sources are all approved)</h3>
+<pre><code>$ python3 volta-desk/.claude/hooks/guard-consent.py --check volta-desk/drafts/2026-09-monthly.md
+OK: all referenced sources are consent-approved.
+good_exit=0</code></pre>
+<hr>
+<h2 id="5-send-to-mailchimp-demo-mode-console-output">5. <code>send-to-mailchimp</code> — demo mode console output</h2>
+<pre><code>$ DEMO_MODE=true MAILCHIMP_API_KEY=DEMO_MAILCHIMP_KEY \
+  python3 volta-desk/.claude/skills/send-to-mailchimp/scripts/send.py \
+  volta-desk/drafts/2026-09-monthly.md</code></pre>
+<h3 id="real-console-output">Real console output</h3>
+<pre><code>Draft: /Users/avijit.karmoker/Desktop/My MacBook/Volta/volta-newsletter-app/volta-desk/drafts/2026-09-monthly.md
+DEMO_MODE effective: True
+Guard: passed (all referenced sources consent_status=approved)
+Subject: Volta newsletter — Month of September 2026
+HTML bytes: 1228
+Calling Mailchimp create_campaign_and_send …
+
+======== MAILCHIMP SEND RESULT ========
+demo:             True
+campaign_id:      demo_6d5eb68854
+status:           sent
+sent:             True
+recipient_count:  12
+from_name:        Volta
+reply_to:         hello@voltaeffect.com
+created_at:       2026-09-22T16:45:17Z
+html_bytes:       1228
+message:          Demo Mailchimp send complete — no live email left the building. Swap DEMO keys for a real MAILCHIMP_API_KEY when ready.
+moved:            drafts/2026-09-monthly.md → sent/2026-09-monthly.md
+log:              logs/2026-09-22-send-to-mailchimp-2026-09-monthly.md
+=======================================
+send_exit=0</code></pre>
+<p><code>drafts/</code> is empty afterward (only <code>.gitkeep</code>).</p>
+<hr>
+<h2 id="6-final-state-sent-outcomes-logs-activity-log">6. Final state — <code>sent/</code>, <code>outcomes/</code>, <code>logs/activity.log</code></h2>
+<h3 id="ls-volta-desk-sent"><code>ls volta-desk/sent/</code></h3>
+<pre><code>.gitkeep
+2026-09-monthly.md</code></pre>
+<h3 id="sent-2026-09-monthly-md-full-file-after-send"><a href="sent/2026-09-monthly.html"><code>sent/2026-09-monthly.md</code></a> (full file after send)</h3>
+<pre><code>---
+type: monthly
+period: 2026-09
+built: 2026-09-22
+skill: build-newsletter
+proof_run: true
+sent_at: 2026-09-22T16:45:17Z
+mailchimp_campaign_id: demo_6d5eb68854
+mailchimp_demo: true
+mailchimp_status: sent
+mailchimp_recipient_count: 12
+skill: send-to-mailchimp
+---
+
+# Volta newsletter — Month of September 2026
+
+## Community
+
+### AI Showcase recap
+
+Volta’s AI Showcase drew strong community turnout. **41 people checked in.**
+
+*(Sources: Laura’s staff tip for a short recap; Amy’s attendance tally for the checked-in figure only.)*
+
+## Programs
+
+### Bridge launch
+
+Keep the Bridge program launch visible this month. Volta Bridge is live as a leadership priority for this issue.
+
+*(Source: Matt’s approved tip. No cohort details — none are stated in the source file.)*
+
+## Member wins
+
+### First paid pilot
+
+A Volta resident closed a first paid pilot with a local enterprise.
+
+*(Source: Rishabh’s tip, approved by Jane. No company name and no dollar amount — the source forbids both until further notice.)*
+
+---
+
+## Sources
+
+- `inbox/2026-09-18-laura-ai-showcase-recap.md` — staff tip to include a short AI Showcase recap
+- `internal-signals/2026-09-12-attendance-ai-showcase.md` — checked-in count (41)
+- `inbox/2026-09-22-matt-bridge-priority.md` — approved leadership priority to keep Bridge launch visible
+- `inbox/2026-09-20-rishabh-founder-pilot.md` — approved founder pilot win (no company/dollars)
+
+## Waiting on consent
+
+- `internal-signals/2026-09-15-meeting-residency-quote.md` — `not_requested` (founder quote; internal until founder approves public use)</code></pre>
+<h3 id="log-outcome-outcomes-2026-09-monthly-md"><code>log-outcome</code> → <a href="outcomes/2026-09-monthly.html"><code>outcomes/2026-09-monthly.md</code></a></h3>
+<pre><code>---
+sent_file: sent/2026-09-monthly.md
+recorded: 2026-09-22
+skill: log-outcome
+proof_run: true
+---
+
+Bader (proof walkthrough): demo Mailchimp send completed for the September issue. No post-send attendance or sign-up figures were provided — none recorded.</code></pre>
+<h3 id="logs-activity-log-full-file"><code>logs/activity.log</code> (full file)</h3>
+<pre><code>2026-09-22T13:39:38-03:00 | skill=build-newsletter | files=drafts/2026-09-monthly.md | Monthly rebuild after Bridge consent approved
+2026-09-22T13:39:38-03:00 | skill=request-consent | files=inbox/2026-09-22-matt-bridge-priority.md | Bridge tip not_requested→pending→approved
+2026-09-22T13:39:39-03:00 | skill=log-outcome | files=outcomes/2026-09-monthly.md | Outcome note recorded; no metrics invented
+2026-09-22T13:39:39-03:00 | skill=build-newsletter | files=sent/2026-09-monthly.md | Finalize blocked by Guard: pending founder pilot referenced
+2026-09-22T13:39:39-03:00 | skill=build-newsletter | files=/Users/avijit.karmoker/Desktop/My MacBook/Volta/volta-newsletter-app/volta-desk/drafts/2026-09-monthly.md | Write wrote 2026-09-monthly.md
+2026-09-22T13:41:53-03:00 | skill=send-to-mailchimp | files=sent/2026-09-monthly.md,logs/2026-09-22-send-to-mailchimp-2026-09-monthly.md | Demo Mailchimp send complete — no live email left the building. Swap DEMO keys for a real MAILCHIMP_API_KEY when ready.
+2026-09-22T13:45:00-03:00 | skill=request-consent | files=inbox/2026-09-20-rishabh-founder-pilot.md | pending→approved (Jane); residency quote left not_requested for Guard proof
+2026-09-22T13:45:10-03:00 | skill=build-newsletter | files=drafts/2026-09-monthly.md | Proof monthly build: 4 approved in, residency quote waiting
+2026-09-22T13:45:11-03:00 | skill=build-newsletter | files=sent/ (blocked) | Guard blocked finalize referencing not_requested residency quote
+2026-09-22T13:45:17-03:00 | skill=send-to-mailchimp | files=sent/2026-09-monthly.md,logs/2026-09-22-send-to-mailchimp-2026-09-monthly.md | Demo Mailchimp send complete — no live email left the building. Swap DEMO keys for a real MAILCHIMP_API_KEY when ready.
+2026-09-22T13:45:17-03:00 | skill=log-outcome | files=outcomes/2026-09-monthly.md | Proof: demo send confirmed; no post-send figures provided</code></pre>
+<p>Proof-month lines are the last five entries (<code>13:45:00</code>–<code>13:45:17</code>).</p>
+<hr>
+<h2 id="what-this-run-proved-on-disk">What this run proved on disk</h2>
+<p>1. Pending founder tip was approved via <code>request-consent</code> with a consent log.</p>
+<p>2. <code>build-newsletter</code> included only <code>approved</code> sources and listed the residency quote under <strong>Waiting on consent</strong>.</p>
+<p>3. Guard <strong>blocked</strong> (<code>exit 2</code>) a finalize that cited the still-<code>not_requested</code> residency quote.</p>
+<p>4. Guard <strong>passed</strong> the real draft; <code>send-to-mailchimp</code> completed a <strong>demo</strong> campaign (<code>demo_6d5eb68854</code>) and moved the file to <code>sent/</code>.</p>
+<p>5. <code>outcomes/</code> and <code>logs/activity.log</code> hold the audit trail without invented metrics.</p>
+  </article>
+</body>
+</html>

@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Volta Desk — system wiring</title>
+  <style>
+    :root {
+      --bg0: #0e1412;
+      --bg1: #16201c;
+      --ink: #e8efe9;
+      --muted: #8fa094;
+      --line: #2a3a33;
+      --rules: #c4a35a;
+      --skill: #3d9b7a;
+      --hook: #d4734e;
+      --folder: #5b7fd6;
+      --restraint: #a67c8a;
+      --panel: rgba(18, 26, 22, 0.94);
+      --glow: rgba(61, 155, 122, 0.35);
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, #1a2a24 0%, transparent 55%),
+        linear-gradient(165deg, var(--bg0), var(--bg1) 55%, #101816);
+      color: var(--ink);
+    }
+
+    body {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 1.25rem 1.5rem 0.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    header h1 {
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+      font-weight: 600;
+      font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 54rem;
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      margin-top: 0.9rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .swatch {
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 2px;
+    }
+    .swatch.rules { background: var(--rules); }
+    .swatch.skill { background: var(--skill); }
+    .swatch.hook { background: var(--hook); }
+    .swatch.folder { background: var(--folder); }
+    .swatch.restraint { background: var(--restraint); }
+
+    .stage-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.5rem 0.75rem 1rem;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      height: min(72vh, 720px);
+      min-height: 560px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background:
+        linear-gradient(rgba(42, 58, 51, 0.25) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42, 58, 51, 0.25) 1px, transparent 1px);
+      background-size: 28px 28px;
+      background-color: rgba(8, 12, 10, 0.55);
+      overflow: hidden;
+    }
+
+    svg.edges {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+    svg.edges path {
+      fill: none;
+      stroke-width: 1.5;
+      opacity: 0.55;
+      transition: opacity 0.2s, stroke-width 0.2s;
+    }
+    svg.edges path.hot {
+      opacity: 1;
+      stroke-width: 2.4;
+    }
+    svg.edges path.dashed {
+      stroke-dasharray: 5 4;
+      opacity: 0.4;
+    }
+    svg.edges text {
+      font-size: 10px;
+      fill: var(--muted);
+      paint-order: stroke;
+      stroke: rgba(14, 20, 18, 0.85);
+      stroke-width: 3px;
+      pointer-events: none;
+    }
+    svg.edges text.hot { fill: var(--ink); }
+
+    .node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      min-width: 7.5rem;
+      max-width: 10.5rem;
+      padding: 0.55rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid;
+      background: var(--panel);
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s;
+      z-index: 2;
+      user-select: none;
+      color: inherit;
+      font: inherit;
+    }
+    .node:hover, .node:focus-visible {
+      transform: translate(-50%, -50%) scale(1.04);
+      outline: none;
+    }
+    .node.active {
+      box-shadow: 0 0 0 2px currentColor, 0 8px 28px var(--glow);
+      z-index: 3;
+    }
+    .node .kind {
+      display: block;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 0.15rem;
+    }
+    .node .label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .node.rules {
+      color: var(--rules);
+      border-color: color-mix(in srgb, var(--rules) 55%, transparent);
+      min-width: 9.5rem;
+      padding: 0.85rem 1rem;
+    }
+    .node.rules .label { font-size: 1rem; }
+    .node.skill {
+      color: var(--skill);
+      border-color: color-mix(in srgb, var(--skill) 50%, transparent);
+    }
+    .node.hook {
+      color: var(--hook);
+      border-color: color-mix(in srgb, var(--hook) 55%, transparent);
+    }
+    .node.folder {
+      color: var(--folder);
+      border-color: color-mix(in srgb, var(--folder) 50%, transparent);
+    }
+    .node.restraint {
+      color: var(--restraint);
+      border-color: color-mix(in srgb, var(--restraint) 55%, transparent);
+      border-style: dashed;
+      max-width: 11rem;
+      min-width: 8.5rem;
+    }
+    .node.rule-chip {
+      color: var(--rules);
+      border-color: color-mix(in srgb, var(--rules) 40%, transparent);
+      min-width: 5.8rem;
+      max-width: 7.2rem;
+      padding: 0.35rem 0.45rem;
+      opacity: 0.95;
+    }
+    .node.rule-chip .label { font-size: 0.72rem; font-weight: 600; }
+
+    .panel {
+      position: absolute;
+      right: 1rem;
+      bottom: 1rem;
+      width: min(24rem, calc(100% - 2rem));
+      max-height: 58%;
+      overflow: auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      z-index: 5;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    }
+    .panel h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.05rem;
+      font-family: Georgia, "Iowan Old Style", Palatino, serif;
+    }
+    .panel .tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      margin-bottom: 0.55rem;
+      border: 1px solid currentColor;
+      opacity: 0.85;
+    }
+    .panel.rules { color: var(--rules); }
+    .panel.skill { color: var(--skill); }
+    .panel.hook { color: var(--hook); }
+    .panel.folder { color: var(--folder); }
+    .panel.restraint { color: var(--restraint); }
+    .panel p {
+      margin: 0 0 0.65rem;
+      color: var(--ink);
+      font-size: 0.88rem;
+      line-height: 1.45;
+      opacity: 0.92;
+    }
+    .panel ul {
+      margin: 0 0 0.5rem;
+      padding-left: 1.1rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .panel li { margin-bottom: 0.3rem; }
+    .panel .hint {
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .panel a {
+      color: #9ec9b5;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .panel a:hover { color: var(--ink); }
+    .panel .rule-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin: 0.5rem 0 0.75rem;
+    }
+    .panel .rule-btns button {
+      text-align: left;
+      background: rgba(196, 163, 90, 0.12);
+      border: 1px solid color-mix(in srgb, var(--rules) 45%, transparent);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 0.45rem 0.55rem;
+      font: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .panel .rule-btns button:hover {
+      background: rgba(196, 163, 90, 0.22);
+    }
+    .panel .cite-box {
+      border-left: 3px solid currentColor;
+      padding: 0.45rem 0.65rem;
+      margin: 0.5rem 0 0.75rem;
+      background: rgba(255,255,255,0.03);
+      font-size: 0.82rem;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    .panel .path-steps {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.65rem;
+    }
+    .panel .links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+    }
+
+    footer {
+      padding: 0.75rem 1.5rem 1.25rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-align: center;
+    }
+
+    @media (max-width: 720px) {
+      .stage { min-height: 680px; height: 78vh; }
+      .panel {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        max-height: none;
+        margin-top: 0.75rem;
+      }
+      .stage-wrap { display: flex; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Volta Desk — system wiring</h1>
+    <p>
+      Start here for structure <em>and</em> reasoning. Click <strong>CLAUDE.md</strong> or a rule chip for the
+      policy rationale; click a dashed “why we didn’t build…” note for restraint.
+      Second click opens a browser page for the transcript that decision should cite
+      (<code>references/transcripts/</code> — paste real interviews when ready).
+      Links open HTML copies so they work when you open this file locally (no server).
+    </p>
+    <div class="legend" aria-hidden="true">
+      <span><i class="swatch rules"></i> Rules</span>
+      <span><i class="swatch skill"></i> Skills</span>
+      <span><i class="swatch hook"></i> Hooks</span>
+      <span><i class="swatch folder"></i> Folders</span>
+      <span><i class="swatch restraint"></i> Not built</span>
+    </div>
+  </header>
+
+  <div class="stage-wrap">
+    <div class="stage" id="stage" role="application" aria-label="Volta desk architecture graph">
+      <svg class="edges" id="edges" aria-hidden="true"></svg>
+    </div>
+    <aside class="panel rules" id="detail" aria-live="polite"></aside>
+  </div>
+
+  <footer>
+    Reasoning files:
+    <a href="references/index.html">all references</a> ·
+    <a href="references/policy-rationale.html">policy rationale</a> ·
+    <a href="references/NOT-BUILT.html">not built</a> ·
+    <a href="references/for-matt.html">for Matt</a>
+  </footer>
+
+  <script>
+    // HTML copies (not .md) — browsers open these reliably from file://
+    const POLICY = "references/policy-rationale.html";
+    const NOT_BUILT = "references/NOT-BUILT.html";
+
+    const POLICY_RULES = [
+      {
+        id: "cadence-monthly",
+        short: "Monthly cadence",
+        rule: "Default cadence is monthly. That is the spine of this system.",
+        section: "Cadence",
+        citation: "UNCITED — transcript body not pasted yet.",
+        expected: "Bader rejecting weekly / affirming monthly.",
+        transcript: "references/transcripts/bader-interview.html",
+        x: 42, y: 38
+      },
+      {
+        id: "cadence-no-weekly",
+        short: "No weekly nudge",
+        rule: "Never default to, suggest, or nudge toward weekly or biweekly sends.",
+        section: "Cadence",
+        citation: "UNCITED — transcript body not pasted yet.",
+        expected: "Bader’s second rejection of weekly (same interview).",
+        transcript: "references/transcripts/bader-interview.html",
+        x: 58, y: 38
+      },
+      {
+        id: "consent-approved",
+        short: "Consent gate",
+        rule: "Nothing enters a draft without consent_status: approved.",
+        section: "Consent gate",
+        citation: "UNCITED — transcript body not pasted yet.",
+        expected: "Bader on asking founders by hand; Matt on approval before using people’s data.",
+        transcript: "references/transcripts/bader-interview.html",
+        transcriptAlt: "references/transcripts/matt-interview.html",
+        x: 42, y: 58
+      },
+      {
+        id: "no-time-savings",
+        short: "No time-savings",
+        rule: "Never claim this system saves time (hours/minutes) in copy or docs.",
+        section: "No time-savings claims",
+        citation: "UNCITED — transcript body not pasted yet.",
+        expected: "Bader: content volume isn’t the bottleneck; time-savings claims are false.",
+        transcript: "references/transcripts/bader-interview.html",
+        x: 58, y: 58
+      },
+      {
+        id: "mailchimp-only",
+        short: "Mailchimp only",
+        rule: "Mailchimp is the only thing that emails real subscribers.",
+        section: "Send path",
+        citation: "UNCITED — transcript body not pasted yet.",
+        expected: "Bader/Matt: Mailchimp stays as send path.",
+        transcript: "references/transcripts/bader-interview.html",
+        transcriptAlt: "references/transcripts/matt-interview.html",
+        x: 50, y: 68
+      },
+      {
+        id: "provability",
+        short: "Provability",
+        rule: "Every action must be logged and produce real artifacts.",
+        section: "Provability",
+        citation: "UNCITED — transcript body not pasted yet.",
+        expected: "Matt: does my input actually count — need visible proof.",
+        transcript: "references/transcripts/matt-interview.html",
+        x: 50, y: 28
+      }
+    ];
+
+    const NOT_BUILT_ITEMS = [
+      {
+        id: "nb-weekly",
+        short: "Why not weekly-by-default?",
+        leftOut: "Weekly (or any more-frequent-by-default) cadence",
+        why: "Bader rejected weekly twice; only a manual opt-in flash update exists instead.",
+        transcript: "references/transcripts/bader-interview.html",
+        anchorHint: "NOT-BUILT §1",
+        x: 72, y: 42,
+        hub: "claude"
+      },
+      {
+        id: "nb-dashboard",
+        short: "Why isn’t there a dashboard?",
+        leftOut: "Built-in analytics dashboard for opens/clicks/unsubscribes",
+        why: "Bader already uses Mailchimp’s own analytics and is satisfied with it.",
+        transcript: "references/transcripts/bader-interview.html",
+        anchorHint: "NOT-BUILT §2",
+        x: 78, y: 62,
+        hub: "outcome"
+      },
+      {
+        id: "nb-replace-mc",
+        short: "Why not replace Mailchimp?",
+        leftOut: "Direct Mailchimp replacement (sending + audience management)",
+        why: "Matt was explicit: Mailchimp stays unless there’s a real reason to switch.",
+        transcript: "references/transcripts/matt-interview.html",
+        anchorHint: "NOT-BUILT §3",
+        x: 8, y: 52,
+        hub: "mailchimp"
+      },
+      {
+        id: "nb-experiments",
+        short: "Why no cadence experiments?",
+        leftOut: "Automated cadence experiments",
+        why: "Matt: don’t add features until the interview shows a gap — no specific frequency hypothesis yet.",
+        transcript: "references/transcripts/mentor-session.html",
+        transcriptAlt: "references/transcripts/matt-interview.html",
+        anchorHint: "NOT-BUILT §4",
+        x: 88, y: 22,
+        hub: "claude"
+      }
+    ];
+
+    const NODES = [
+      {
+        id: "claude",
+        kind: "rules",
+        label: "CLAUDE.md",
+        x: 50, y: 48,
+        title: "CLAUDE.md — always-on rules",
+        blurb: "Loads into every session. Click a rule below (or a gold chip on the graph) to open its entry in policy-rationale.md, then the transcript file.",
+        mode: "claude"
+      },
+      {
+        id: "build",
+        kind: "skill",
+        label: "build-newsletter",
+        x: 22, y: 18,
+        title: "Skill: build-newsletter",
+        blurb: "Drafts the monthly issue (or optional flash) from approved sources only.",
+        points: [
+          "Reads every inbox/ and internal-signals/ file",
+          "Includes only consent_status: approved",
+          "Lists waiting items — never silently drops them"
+        ]
+      },
+      {
+        id: "consent",
+        kind: "skill",
+        label: "request-consent",
+        x: 78, y: 14,
+        title: "Skill: request-consent",
+        blurb: "Makes Bader’s hand-ask for permission an explicit, trackable file action.",
+        points: [
+          "Sets consent_status to pending and logs who/when",
+          "Records approved or declined when a reply comes back"
+        ]
+      },
+      {
+        id: "outcome",
+        kind: "skill",
+        label: "log-outcome",
+        x: 90, y: 48,
+        title: "Skill: log-outcome",
+        blurb: "Records what happened after a send — only what Bader actually reports. No built-in opens dashboard (see restraint note).",
+        points: [
+          "Creates/updates outcomes/ from a sent/ file",
+          "No invented numbers",
+          "Mailchimp keeps opens/clicks analytics"
+        ]
+      },
+      {
+        id: "mailchimp",
+        kind: "skill",
+        label: "send-to-mailchimp",
+        x: 14, y: 62,
+        title: "Skill: send-to-mailchimp",
+        blurb: "The only place in volta-desk allowed to talk to Mailchimp.",
+        points: [
+          "Runs Guard before any send",
+          "Demo or live campaign create/send",
+          "On success: drafts/ → sent/"
+        ]
+      },
+      {
+        id: "guard",
+        kind: "hook",
+        label: "Guard Hook",
+        x: 28, y: 84,
+        title: "Hook: Guard (PreToolUse)",
+        blurb: "Structural consent enforcement before anything is treated as ready for Mailchimp.",
+        points: [
+          "Fires before Write/Edit into sent/",
+          "Blocks if any referenced source is not approved"
+        ]
+      },
+      {
+        id: "journal",
+        kind: "hook",
+        label: "Journal Hook",
+        x: 62, y: 84,
+        title: "Hook: Journal (PostToolUse)",
+        blurb: "Audit trail for “does my input actually count?”",
+        points: [
+          "Appends to logs/activity.log",
+          "Skill, files touched, one-line result"
+        ]
+      },
+      {
+        id: "inbox",
+        kind: "folder",
+        label: "inbox/",
+        x: 6, y: 32,
+        title: "Folder: inbox/",
+        blurb: "Anyone drops a suggestion here — no login.",
+        points: ["consent_status in frontmatter"]
+      },
+      {
+        id: "signals",
+        kind: "folder",
+        label: "internal-signals/",
+        x: 34, y: 10,
+        title: "Folder: internal-signals/",
+        blurb: "Internal Volta data — same consent gate.",
+        points: ["Attendance, launches, notes"]
+      },
+      {
+        id: "held",
+        kind: "folder",
+        label: "held/",
+        x: 94, y: 34,
+        title: "Folder: held/",
+        blurb: "Revisit later — not this month’s build.",
+        points: []
+      },
+      {
+        id: "drafts",
+        kind: "folder",
+        label: "drafts/",
+        x: 36, y: 72,
+        title: "Folder: drafts/",
+        blurb: "In-progress issue Bader reviews as markdown.",
+        points: []
+      },
+      {
+        id: "sent",
+        kind: "folder",
+        label: "sent/",
+        x: 10, y: 80,
+        title: "Folder: sent/",
+        blurb: "Archive after Mailchimp handoff.",
+        points: []
+      },
+      {
+        id: "outcomes",
+        kind: "folder",
+        label: "outcomes/",
+        x: 86, y: 76,
+        title: "Folder: outcomes/",
+        blurb: "Manual post-send notes only.",
+        points: []
+      },
+      {
+        id: "logs",
+        kind: "folder",
+        label: "logs/",
+        x: 50, y: 88,
+        title: "Folder: logs/",
+        blurb: "Skill/hook run records + activity.log.",
+        points: []
+      }
+    ];
+
+    POLICY_RULES.forEach(r => {
+      NODES.push({
+        id: r.id,
+        kind: "rule-chip",
+        label: r.short,
+        x: r.x,
+        y: r.y,
+        mode: "policy",
+        policyId: r.id
+      });
+    });
+
+    NOT_BUILT_ITEMS.forEach(item => {
+      NODES.push({
+        id: item.id,
+        kind: "restraint",
+        label: item.short,
+        x: item.x,
+        y: item.y,
+        mode: "notbuilt",
+        notBuiltId: item.id
+      });
+    });
+
+    const EDGES = [
+      { from: "claude", to: "build", label: "rules bind every draft", color: "var(--rules)" },
+      { from: "claude", to: "consent", label: "consent is a hard gate", color: "var(--rules)" },
+      { from: "claude", to: "outcome", label: "no invented metrics", color: "var(--rules)" },
+      { from: "claude", to: "mailchimp", label: "only path that touches Mailchimp", color: "var(--rules)" },
+      { from: "claude", to: "guard", label: "enforce consent structurally", color: "var(--rules)" },
+      { from: "claude", to: "journal", label: "every action must be provable", color: "var(--rules)" },
+
+      { from: "build", to: "inbox", label: "reads consent_status before drafting", color: "var(--skill)" },
+      { from: "build", to: "signals", label: "reads consent_status before drafting", color: "var(--skill)" },
+      { from: "build", to: "drafts", label: "writes monthly / flash markdown", color: "var(--skill)" },
+      { from: "build", to: "logs", label: "logs every run", color: "var(--skill)" },
+
+      { from: "consent", to: "inbox", label: "pending → approved / declined", color: "var(--skill)" },
+      { from: "consent", to: "signals", label: "same gate for internal data", color: "var(--skill)" },
+      { from: "consent", to: "logs", label: "logs every run", color: "var(--skill)" },
+
+      { from: "outcome", to: "sent", label: "reads archived issue", color: "var(--skill)" },
+      { from: "outcome", to: "outcomes", label: "writes reported results only", color: "var(--skill)" },
+      { from: "outcome", to: "logs", label: "logs every run", color: "var(--skill)" },
+
+      { from: "mailchimp", to: "drafts", label: "takes Guard-passed draft", color: "var(--skill)" },
+      { from: "mailchimp", to: "guard", label: "must pass before send", color: "var(--hook)" },
+      { from: "mailchimp", to: "sent", label: "moves draft after demo/live send", color: "var(--skill)" },
+      { from: "mailchimp", to: "logs", label: "logs every run", color: "var(--skill)" },
+
+      { from: "guard", to: "sent", label: "blocks send if consent missing", color: "var(--hook)" },
+      { from: "guard", to: "inbox", label: "verifies referenced sources", color: "var(--hook)" },
+      { from: "guard", to: "signals", label: "verifies referenced sources", color: "var(--hook)" },
+
+      { from: "journal", to: "logs", label: "appends activity.log", color: "var(--hook)" },
+      { from: "held", to: "build", label: "parked — not this month", color: "var(--folder)" },
+
+      { from: "claude", to: "cadence-monthly", label: "why monthly", color: "var(--rules)" },
+      { from: "claude", to: "consent-approved", label: "why consent", color: "var(--rules)" },
+      { from: "claude", to: "nb-weekly", label: "deliberately omitted", color: "var(--restraint)", dashed: true },
+      { from: "outcome", to: "nb-dashboard", label: "deliberately omitted", color: "var(--restraint)", dashed: true },
+      { from: "mailchimp", to: "nb-replace-mc", label: "deliberately omitted", color: "var(--restraint)", dashed: true },
+      { from: "claude", to: "nb-experiments", label: "deliberately omitted", color: "var(--restraint)", dashed: true }
+    ];
+
+    const stage = document.getElementById("stage");
+    const svg = document.getElementById("edges");
+    const detail = document.getElementById("detail");
+    const byId = Object.fromEntries(NODES.map(n => [n.id, n]));
+    const policyById = Object.fromEntries(POLICY_RULES.map(r => [r.id, r]));
+    const notBuiltById = Object.fromEntries(NOT_BUILT_ITEMS.map(r => [r.id, r]));
+
+    function pctToXY(n) {
+      const r = stage.getBoundingClientRect();
+      return { x: (n.x / 100) * r.width, y: (n.y / 100) * r.height };
+    }
+
+    function markActive(id) {
+      document.querySelectorAll(".node").forEach(el => {
+        el.classList.toggle("active", el.dataset.id === id);
+      });
+    }
+
+    function renderNodes() {
+      NODES.forEach(n => {
+        const el = document.createElement("button");
+        el.type = "button";
+        el.className = `node ${n.kind}`;
+        el.dataset.id = n.id;
+        el.style.left = n.x + "%";
+        el.style.top = n.y + "%";
+        const kindLabel = n.kind === "rule-chip" ? "rule" : n.kind === "restraint" ? "not built" : n.kind;
+        el.innerHTML = `<span class="kind">${kindLabel}</span><span class="label">${n.label}</span>`;
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          select(n.id);
+        });
+        stage.appendChild(el);
+      });
+    }
+
+    function curve(a, b) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2;
+      const cx = mx - dy * 0.12;
+      const cy = my + dx * 0.12;
+      return {
+        d: `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`,
+        mid: { x: (a.x + 2 * cx + b.x) / 4, y: (a.y + 2 * cy + b.y) / 4 }
+      };
+    }
+
+    function renderEdges(activeId) {
+      const r = stage.getBoundingClientRect();
+      svg.setAttribute("viewBox", `0 0 ${r.width} ${r.height}`);
+      svg.innerHTML = "";
+      EDGES.forEach((e) => {
+        if (!byId[e.from] || !byId[e.to]) return;
+        const a = pctToXY(byId[e.from]);
+        const b = pctToXY(byId[e.to]);
+        const { d, mid } = curve(a, b);
+        const hot = !activeId || e.from === activeId || e.to === activeId;
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", d);
+        path.setAttribute("stroke", e.color);
+        if (e.dashed) path.classList.add("dashed");
+        path.classList.toggle("hot", hot && !!activeId);
+        if (activeId && !hot) path.style.opacity = "0.1";
+        svg.appendChild(path);
+
+        if (!activeId || hot) {
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", mid.x);
+          text.setAttribute("y", mid.y);
+          text.setAttribute("text-anchor", "middle");
+          text.classList.toggle("hot", !!activeId && hot);
+          text.textContent = e.label;
+          svg.appendChild(text);
+        }
+      });
+    }
+
+    function showClaudeHub() {
+      markActive("claude");
+      detail.className = "panel rules";
+      detail.innerHTML = `
+        <span class="tag">Rules</span>
+        <h2>CLAUDE.md</h2>
+        <p class="path-steps">Click 1 of 2 — pick a rule to see its policy-rationale entry, then open the transcript.</p>
+        <p>Always-on memory. Every skill and hook inherits these constraints. Full write-up:
+          <a href="${POLICY}">references/policy-rationale.html</a></p>
+        <div class="rule-btns">
+          ${POLICY_RULES.map(r =>
+            `<button type="button" data-policy="${r.id}">${r.short} — ${r.section}</button>`
+          ).join("")}
+        </div>
+        <p class="hint">Gold chips around the center open the same entries. Dashed pink nodes = deliberately not built.</p>
+      `;
+      detail.querySelectorAll("[data-policy]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          showPolicy(btn.getAttribute("data-policy"));
+        });
+      });
+      renderEdges("claude");
+    }
+
+    function showPolicy(policyId) {
+      const r = policyById[policyId];
+      if (!r) return;
+      markActive(policyId);
+      detail.className = "panel rules";
+      const alt = r.transcriptAlt
+        ? `<a href="${r.transcriptAlt}">${r.transcriptAlt}</a>`
+        : "";
+      detail.innerHTML = `
+        <span class="tag">Policy rationale</span>
+        <h2>${r.short}</h2>
+        <p class="path-steps">Click 2 of 2 — open the transcript page for the actual speaker line (paste interviews if still placeholder).</p>
+        <p><strong>Rule (from CLAUDE.md):</strong> ${r.rule}</p>
+        <div class="cite-box">
+          <div><strong>Citation status:</strong> ${r.citation}</div>
+          <div style="margin-top:0.35rem"><strong>Expected moment:</strong> ${r.expected}</div>
+        </div>
+        <div class="links">
+          <a href="${POLICY}">Open ${POLICY} (${r.section})</a>
+          <a href="${r.transcript}">Open transcript → ${r.transcript}</a>
+          ${alt ? alt : ""}
+          <button type="button" id="back-claude" style="margin-top:0.4rem;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:4px;padding:0.3rem 0.5rem;cursor:pointer;font:inherit;font-size:0.78rem">← Back to CLAUDE.md rules</button>
+        </div>
+      `;
+      document.getElementById("back-claude").addEventListener("click", (e) => {
+        e.stopPropagation();
+        showClaudeHub();
+      });
+      renderEdges(policyId);
+    }
+
+    function showNotBuilt(nbId) {
+      const item = notBuiltById[nbId];
+      if (!item) return;
+      markActive(nbId);
+      detail.className = "panel restraint";
+      const alt = item.transcriptAlt
+        ? `<a href="${item.transcriptAlt}">${item.transcriptAlt}</a>`
+        : "";
+      detail.innerHTML = `
+        <span class="tag">Not built</span>
+        <h2>${item.short}</h2>
+        <p class="path-steps">Click 2 of 2 — open NOT-BUILT, then the transcript that justifies leaving this out.</p>
+        <p><strong>Left out:</strong> ${item.leftOut}</p>
+        <div class="cite-box">${item.why}</div>
+        <div class="links">
+          <a href="${NOT_BUILT}">Open ${NOT_BUILT} (${item.anchorHint})</a>
+          <a href="${item.transcript}">Open transcript → ${item.transcript}</a>
+          ${alt ? alt : ""}
+        </div>
+        <p class="hint">Restraint is the product of Matt’s coaching: don’t ship until the interview shows a gap.</p>
+      `;
+      renderEdges(nbId);
+    }
+
+    function select(id) {
+      const n = byId[id];
+      if (!n) return;
+      if (n.mode === "claude") return showClaudeHub();
+      if (n.mode === "policy") return showPolicy(n.policyId);
+      if (n.mode === "notbuilt") return showNotBuilt(n.notBuiltId);
+
+      markActive(id);
+      detail.className = `panel ${n.kind}`;
+      const points = (n.points || []).map(p => `<li>${p}</li>`).join("");
+      detail.innerHTML = `
+        <span class="tag">${n.kind}</span>
+        <h2>${n.title}</h2>
+        <p>${n.blurb}</p>
+        ${points ? `<ul>${points}</ul>` : ""}
+        <p class="hint">For <em>why</em> a rule exists, click CLAUDE.md or a gold rule chip. For what we refused to build, click a dashed note.</p>
+      `;
+      renderEdges(id);
+    }
+
+    renderNodes();
+    renderEdges(null);
+    showClaudeHub();
+
+    window.addEventListener("resize", () => {
+      const active = document.querySelector(".node.active");
+      renderEdges(active ? active.dataset.id : null);
+    });
+
+    stage.addEventListener("click", () => {
+      document.querySelectorAll(".node").forEach(el => el.classList.remove("active"));
+      detail.className = "panel rules";
+      detail.innerHTML = `
+        <span class="tag">Overview</span>
+        <h2>Two clicks to the source</h2>
+        <p><strong>1.</strong> CLAUDE.md or a rule chip → policy rationale.<br>
+           <strong>2.</strong> Transcript link → the interview line (once pasted).</p>
+        <p>Dashed notes answer “why isn’t there a dashboard / weekly send / Mailchimp replacement?” via
+          <a href="${NOT_BUILT}">NOT-BUILT.html</a>.</p>
+      `;
+      renderEdges(null);
+    });
+  </script>
+</body>
+</html>

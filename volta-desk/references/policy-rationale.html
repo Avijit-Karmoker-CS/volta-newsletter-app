@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>policy-rationale — Volta Desk</title>
+  <link rel="stylesheet" href="ref.css" />
+</head>
+<body>
+  <nav>
+    <a href="../architecture.html">← Architecture diagram</a>
+    <a href="index.html">All references</a>
+  </nav>
+  <article>
+<h1>Policy rationale — CLAUDE.md ↔ transcripts</h1>
+<p>Grounding rule (same as <code>build-newsletter</code>): <strong>no CLAUDE.md rule gets a citation here unless it quotes or closely paraphrases a real line in `references/transcripts/`.</strong></p>
+<h2 id="transcript-status-blocking">Transcript status (blocking)</h2>
+<p>As of this file’s creation, all three transcript files are <strong>placeholders with no interview body</strong>:</p>
+<table><thead><tr><th>File</th><th>Usable dialogue?</th></tr></thead><tbody>
+<tr><td><a href="transcripts/bader-interview.html"><code>references/transcripts/bader-interview.md</code></a></td><td>No — paste pending</td></tr>
+<tr><td><a href="transcripts/matt-interview.html"><code>references/transcripts/matt-interview.md</code></a></td><td>No — paste pending</td></tr>
+<tr><td><a href="transcripts/mentor-session.html"><code>references/transcripts/mentor-session.md</code></a></td><td>No — paste pending</td></tr>
+</tbody></table>
+<p>Therefore <strong>every rule below is flagged UNCITED</strong>. No quotes or paraphrases were invented from memory, prior chat summaries, or product lore.</p>
+<p>When real transcripts are pasted, replace each <code>UNCITED</code> block with:</p>
+<ul>
+<li><strong>Rule:</strong> (verbatim or near-verbatim from CLAUDE.md)</li>
+<li><strong>Who / what:</strong> quote or close paraphrase + speaker</li>
+<li><strong>Source:</strong> path + enough context to find the moment (e.g. surrounding turn)</li>
+</ul>
+<hr>
+<h2 id="cadence">Cadence</h2>
+<h3 id="rule-default-cadence-is-monthly-that-is-the-spine-of-this-system">Rule: Default cadence is monthly. That is the spine of this system.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no line available in <a href="bader-interview.html"><code>bader-interview.md</code></a> (or others).</li>
+<li><strong>Expected source (once pasted):</strong> Bader rejecting weekly / affirming monthly — do not fill until the transcript has that moment.</li>
+</ul>
+<h3 id="rule-never-default-to-suggest-or-nudge-toward-weekly-or-biweekly-sends">Rule: Never default to, suggest, or nudge toward weekly or biweekly sends.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Expected source (once pasted):</strong> Same Bader cadence discussion (including any second rejection of weekly).</li>
+</ul>
+<h3 id="rule-a-flash-update-is-an-optional-separate-cheap-action-for-genuinely-time-sens">Rule: A flash update is an optional, separate, cheap action for genuinely time-sensitive news only — never a replacement for the monthly issue, and never a prompt to send more often.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Note:</strong> This may be a design elaboration of the monthly spine rather than a direct stakeholder quote. Flag for re-check after paste: either cite a real line or demote/remove from CLAUDE.md if unsupported.</li>
+</ul>
+<hr>
+<h2 id="consent-gate">Consent gate</h2>
+<h3 id="rule-nothing-enters-a-draft-without-consent-status-approved">Rule: Nothing enters a draft without <code>consent_status: approved</code>.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Expected source (once pasted):</strong> Bader on asking founders permission before including their story; and/or Matt on approval before using people’s data.</li>
+</ul>
+<h3 id="rule-applies-to-founder-stories-and-internal-volta-data-attendance-meeting-notes">Rule: Applies to founder stories and internal Volta data (attendance, meeting notes, program launches, etc.).</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Expected source (once pasted):</strong> Matt on ownership of internal / person-generated data needing clear approval before use (and Bader on founder stories, if stated separately).</li>
+</ul>
+<h3 id="rule-pending-not-requested-declined-or-missing-consent-exclude-do-not-soft-inclu">Rule: Pending, not_requested, declined, or missing consent → exclude. Do not soft-include or “flag for later inside the draft.”</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Note:</strong> Implementation detail of the consent gate. Needs either an explicit stakeholder line or a clear “derived from [cited consent rule]” once the parent rule is cited — still no invented quote.</li>
+</ul>
+<hr>
+<h2 id="grounding">Grounding</h2>
+<h3 id="rule-every-claim-in-a-draft-must-trace-to-a-real-file-under-inbox-or-internal-si">Rule: Every claim in a draft must trace to a real file under <code>inbox/</code> or <code>internal-signals/</code>.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Note:</strong> May be system-design / discovery-method (mentor session) rather than a newsletter-content quote. Do not invent; cite mentor-session or interview line after paste, or flag for CLAUDE.md revision.</li>
+</ul>
+<h3 id="rule-no-invented-statistics-no-paraphrased-into-existence-claims-no-vague-filler">Rule: No invented statistics, no paraphrased-into-existence claims, no vague filler where a specific fact should be.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+</ul>
+<h3 id="rule-if-a-fact-has-no-source-file-omit-it">Rule: If a fact has no source file, omit it.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+</ul>
+<hr>
+<h2 id="no-time-savings-claims">No time-savings claims</h2>
+<h3 id="rule-never-claim-this-system-saves-time-e-g-cuts-prep-from-x-hours-to-y-minutes-">Rule: Never claim this system saves time (e.g. “cuts prep from X hours to Y minutes”) in generated copy, docs, comments, or skill text.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Expected source (once pasted):</strong> Bader stating content volume / prep-time is not his bottleneck (and any note that time-savings claims were previously removed).</li>
+</ul>
+<hr>
+<h2 id="send-path">Send path</h2>
+<h3 id="rule-mailchimp-is-the-only-thing-that-emails-real-subscribers">Rule: Mailchimp is the only thing that emails real subscribers.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Expected source (once pasted):</strong> Bader (or ops context in his interview) on sending via Mailchimp.</li>
+</ul>
+<h3 id="rule-this-system-drafts-and-prepares-content-it-never-sends-to-a-live-list-itsel">Rule: This system drafts and prepares content. It never sends to a live list itself.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Note:</strong> Product-boundary statement; needs transcript support or explicit “derived from Mailchimp-only send” once that parent is cited.</li>
+</ul>
+<h3 id="rule-do-not-build-or-imply-an-opens-clicks-unsubscribes-analytics-dashboard-mail">Rule: Do not build or imply an opens/clicks/unsubscribes analytics dashboard — Mailchimp owns that.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Expected source (once pasted):</strong> Bader satisfied with Mailchimp’s own analytics (if stated).</li>
+</ul>
+<hr>
+<h2 id="provability">Provability</h2>
+<h3 id="rule-every-action-must-be-logged-and-produce-real-artifacts-files-status-changes">Rule: Every action must be logged and produce real artifacts (files, status changes, draft outputs).</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Expected source (once pasted):</strong> Matt on whether input “actually counts” / need for visible proof — only if that line exists after paste.</li>
+</ul>
+<h3 id="rule-prefer-writing-proof-to-disk-over-asserting-that-work-was-done">Rule: Prefer writing proof to disk over asserting that work was done.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — no transcript line available.</li>
+<li><strong>Note:</strong> Likely derived from the provability / audit concern; do not invent a Matt quote.</li>
+</ul>
+<hr>
+<h2 id="preamble-also-in-claude-md">Preamble (also in CLAUDE.md)</h2>
+<h3 id="rule-operate-this-folder-as-bader-s-newsletter-desk-inside-claude-cursor-do-not-">Rule: Operate this folder as Bader’s newsletter desk inside Claude/Cursor. Do not modify or depend on the FastAPI <code>app/</code> tree.</h3>
+<ul>
+<li><strong>Citation:</strong> UNCITED — architectural choice for this phase; not expected to appear as interview dialogue unless someone stated “no server / folder in Cursor.” Flag: keep as build constraint or cite if a transcript supports the agent-operated desk.</li>
+</ul>
+<hr>
+<h2 id="action-required-maintainer">Action required (maintainer)</h2>
+<p>1. Paste full transcripts into the three files under <code>references/transcripts/</code>.</p>
+<p>2. Re-open this document and fill <strong>Rule / Who–what / Source</strong> for each UNCITED item from real lines only.</p>
+<p>3. Any CLAUDE.md rule that still cannot be traced after paste should be removed or rewritten — not given a fake rationale.</p>
+  </article>
+</body>
+</html>
