@@ -193,7 +193,7 @@ def customize_page(request: Request):
     user, redirect = _require_user(request)
     if redirect:
         return redirect
-    open_recs = [r for r in storage.list_recommendations() if not r.get("included")]
+    open_recs = storage.active_recommendations()
     return templates.TemplateResponse(
         "customize.html",
         _ctx(request, open_recs=open_recs, error=None),
@@ -210,7 +210,7 @@ async def customize_submit(request: Request, plan: str = Form(...)):
         request.session["flash"] = f"Custom draft ready: {draft.get('subject')}"
         return RedirectResponse("/review", status_code=status.HTTP_303_SEE_OTHER)
     except Exception as exc:  # noqa: BLE001
-        open_recs = [r for r in storage.list_recommendations() if not r.get("included")]
+        open_recs = storage.active_recommendations()
         return templates.TemplateResponse(
             "customize.html",
             _ctx(request, open_recs=open_recs, error=str(exc), plan=plan),
@@ -223,11 +223,20 @@ def recommendations_page(request: Request):
     user, redirect = _require_user(request)
     if redirect:
         return redirect
-    recs = storage.list_recommendations()
+    active = storage.active_recommendations()
+    held = storage.held_recommendations()
+    included = [r for r in storage.list_recommendations() if r.get("included")]
     flash = request.session.pop("flash", None)
     return templates.TemplateResponse(
         "recommendations.html",
-        _ctx(request, recs=recs, error=None, flash=flash),
+        _ctx(
+            request,
+            active_recs=active,
+            held_recs=held,
+            included_recs=included,
+            error=None,
+            flash=flash,
+        ),
     )
 
 
@@ -241,10 +250,15 @@ def recommendations_submit(
     if redirect:
         return redirect
     if not title.strip() or not body.strip():
-        recs = storage.list_recommendations()
         return templates.TemplateResponse(
             "recommendations.html",
-            _ctx(request, recs=recs, error="Title and body are required."),
+            _ctx(
+                request,
+                active_recs=storage.active_recommendations(),
+                held_recs=storage.held_recommendations(),
+                included_recs=[r for r in storage.list_recommendations() if r.get("included")],
+                error="Title and body are required.",
+            ),
             status_code=400,
         )
     storage.save_recommendation(user.display_name, title, body)
@@ -268,6 +282,27 @@ def recommendations_consent(
     else:
         label = storage.normalize_consent(updated.get("consent_status"))
         request.session["flash"] = f"Consent → {label} for “{updated.get('title')}”."
+    return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.post("/recommendations/{rec_id}/hold")
+def recommendations_hold(
+    request: Request,
+    rec_id: str,
+    held: str = Form("1"),
+):
+    """Park or release a story ('check back next month')."""
+    user, redirect = _require_user(request)
+    if redirect:
+        return redirect
+    want_held = held.strip().lower() in {"1", "true", "yes", "on", "held"}
+    updated = storage.set_held(rec_id, want_held)
+    if not updated:
+        request.session["flash"] = "Recommendation not found."
+    elif want_held:
+        request.session["flash"] = f"Held for later: “{updated.get('title')}”."
+    else:
+        request.session["flash"] = f"Back in the active list: “{updated.get('title')}”."
     return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
 
 

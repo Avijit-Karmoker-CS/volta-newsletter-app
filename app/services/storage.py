@@ -51,6 +51,7 @@ def list_recommendations() -> list[dict]:
         if isinstance(item, dict):
             item["_id"] = path.stem
             item["consent_status"] = normalize_consent(item.get("consent_status"))
+            item["held"] = bool(item.get("held"))
             items.append(item)
     items.sort(key=lambda x: x.get("created_at", ""), reverse=True)
     return items
@@ -64,6 +65,7 @@ def save_recommendation(author: str, title: str, body: str, tags: list[str] | No
         "tags": tags or [],
         "created_at": utc_now(),
         "included": False,
+        "held": False,
         "consent_status": DEFAULT_CONSENT,
     }
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
@@ -84,7 +86,42 @@ def set_consent_status(rec_id: str, status: str) -> dict | None:
     payload["consent_updated_at"] = utc_now()
     _write(path, payload)
     payload["_id"] = path.stem
+    payload["held"] = bool(payload.get("held"))
+    payload["consent_status"] = normalize_consent(payload.get("consent_status"))
     return payload
+
+
+def set_held(rec_id: str, held: bool = True) -> dict | None:
+    """Park a story for later (Bader's 'check back next month' mental note)."""
+    path = data_dir() / "recommendations" / f"{rec_id}.json"
+    if not path.exists():
+        return None
+    payload = _read(path, {})
+    payload["held"] = bool(held)
+    payload["held_updated_at"] = utc_now()
+    _write(path, payload)
+    payload["_id"] = path.stem
+    payload["held"] = bool(payload.get("held"))
+    payload["consent_status"] = normalize_consent(payload.get("consent_status"))
+    return payload
+
+
+def active_recommendations() -> list[dict]:
+    """Fresh / pending tips — not yet sent, not sitting on hold."""
+    return [
+        r
+        for r in list_recommendations()
+        if not r.get("included") and not r.get("held")
+    ]
+
+
+def held_recommendations() -> list[dict]:
+    """Stories Bader is sitting on for a later issue."""
+    return [
+        r
+        for r in list_recommendations()
+        if r.get("held") and not r.get("included")
+    ]
 
 
 def draft_unapproved_stories(draft: dict | None) -> list[dict]:

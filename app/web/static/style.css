@@ -269,6 +269,14 @@ textarea.code {
 .badge.consent-pending { background: #3a3420; color: #e6d089; }
 .badge.consent-approved { background: #1c3a2a; color: #8fd6b0; }
 .badge.consent-declined { background: #3a1c1c; color: #e89a9a; }
+.badge.held { background: #2a2a3a; color: #b8b4d4; }
+.section-title {
+  font-size: 1.05rem;
+  margin: 0 0 6px;
+}
+.held-section {
+  border-color: #3a3a55;
+}
 .consent-row {
   display: flex;
   flex-wrap: wrap;

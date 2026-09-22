@@ -28,6 +28,7 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
         r
         for r in recs
         if not r.get("included")
+        and not r.get("held")
         and storage.normalize_consent(r.get("consent_status")) == "approved"
     ]
     public_signals = research_svc.fetch_public_signals()
@@ -114,6 +115,7 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
         r
         for r in recs
         if not r.get("included")
+        and not r.get("held")
         and storage.normalize_consent(r.get("consent_status")) == "approved"
     ]
     packet = research_svc.research_with_prompt(plan, pending)
