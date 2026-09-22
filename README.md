@@ -22,7 +22,7 @@ Cadence defaults to **monthly** (`NEWSLETTER_CADENCE=monthly`). Change only deli
 4. Tap **Email to community** (demo send — no live email)
 5. **Send history** to confirm
 
-Staff tip without logging in: open **/suggest** or `POST /ingest/email`.
+Staff tip without logging in: `/suggest-newsletter` in Slack, open **/suggest**, or `POST /ingest/email`.
 
 ## Hosting (persistent service)
 
@@ -56,6 +56,7 @@ Set these in the host dashboard / `fly secrets set` — not in git:
 | `DEMO_MODE` | `true` until live Mailchimp |
 | `OPENAI_API_KEY` | optional |
 | `EMAIL_IN_TOKEN` | optional gate for `/ingest/email` |
+| `SLACK_SIGNING_SECRET` | required for `/slack/suggest` (Slack app Signing Secret) |
 
 The app **refuses to start** on Fly/Render/Railway if `VOLTA_SESSION_SECRET` is missing or still the local demo default.
 
@@ -101,6 +102,31 @@ curl -s -X POST https://volta-newsletter.fly.dev/ingest/email \
 ```
 
 Or open `/suggest` on a phone.
+
+## Slack slash command (no webpage)
+
+Staff can tip from Slack without opening the desk:
+
+```
+/suggest-newsletter Keep Bridge visible | Make sure the Bridge launch stays in this issue
+```
+
+This hits `POST /slack/suggest`, verifies Slack’s signing secret, then uses the same `ingest_email_recommendation()` path as email-in. Reply is ephemeral: “Got it — … is in Bader’s inbox, no login needed.”
+
+### One-time Slack app setup
+
+1. https://api.slack.com/apps → **Create New App** → **From a manifest** → paste `slack-app-manifest.yaml` (or create manually).
+2. Under **Slash Commands**, confirm Request URL is `https://volta-newsletter.fly.dev/slack/suggest`.
+3. **Basic Information** → copy **Signing Secret**.
+4. Set it on the host (never commit it):
+
+```bash
+fly secrets set SLACK_SIGNING_SECRET=your-signing-secret
+```
+
+5. **Install App** to the Volta workspace. Matt / Rishabh / Laura / Amy can use the command immediately — no desk login.
+
+Unsigned or forged Slack posts are rejected with HTTP 401. If `SLACK_SIGNING_SECRET` is unset, the endpoint refuses all requests.
 
 ## Internal signals (manual)
 

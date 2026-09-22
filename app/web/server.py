@@ -155,6 +155,64 @@ async def ingest_email(request: Request):
     return JSONResponse(result, status_code=201)
 
 
+@app.post("/slack/suggest")
+async def slack_suggest(request: Request):
+    """Slash command: /suggest-newsletter Title | Body → same inbox as email-in.
+
+    Verifies Slack signing secret, then calls ingest_email_recommendation().
+    Responds within Slack's 3s window with an ephemeral confirmation.
+    """
+    from app.services import slack as slack_svc
+    from app.services.slack import SlackAuthError
+
+    body = await request.body()
+    try:
+        slack_svc.verify_slack_request(
+            body=body,
+            timestamp=request.headers.get("X-Slack-Request-Timestamp"),
+            signature=request.headers.get("X-Slack-Signature"),
+        )
+    except SlackAuthError as exc:
+        return JSONResponse({"ok": False, "error": str(exc)}, status_code=401)
+
+    # Re-parse form from the verified raw body (application/x-www-form-urlencoded).
+    from urllib.parse import parse_qs
+
+    form = {k: (v[0] if v else "") for k, v in parse_qs(body.decode("utf-8"), keep_blank_values=True).items()}
+    text = str(form.get("text") or "").strip()
+    # Slack slash payloads expose user_name; map via resolve_sender like email-in.
+    sender = str(form.get("user_name") or form.get("user_id") or "Staff")
+
+    if not text:
+        return JSONResponse(slack_svc.slack_ephemeral(slack_svc.USAGE))
+
+    try:
+        subject, note = slack_svc.parse_suggest_text(text)
+    except ValueError:
+        return JSONResponse(slack_svc.slack_ephemeral(slack_svc.USAGE))
+
+    try:
+        # Signature already proved the caller is Slack — supply the configured
+        # EMAIL_IN_TOKEN (if any) so ingest's optional gate still passes.
+        result = ingest_svc.ingest_email_recommendation(
+            subject=subject,
+            body=note,
+            sender=sender,
+            token=ingest_svc.email_in_token() or None,
+        )
+    except IngestError as exc:
+        return JSONResponse(
+            slack_svc.slack_ephemeral(f"Couldn’t save that tip: {exc}"),
+            status_code=200,
+        )
+
+    return JSONResponse(
+        slack_svc.slack_ephemeral(
+            f"Got it — “{result['title']}” is in Bader’s inbox, no login needed."
+        )
+    )
+
+
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     if _user(request):
