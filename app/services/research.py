@@ -192,12 +192,12 @@ Public web signals:
 From Volta's own activity (internal, consent-approved only):
 {chr(10).join(f"- {s['title']}: {s['summary']}" for s in internal) or '(none approved yet)'}
 
-Return a tight plan for THIS WEEK's newsletter:
+Return a tight plan for THIS ISSUE's newsletter (respect monthly cadence; do not invent a weekly schedule):
 1) Subject line
 2) Opening paragraph (2-3 sentences, community-facing)
 3) Exactly three featured items (title, when, why it matters, CTA)
 4) Optional short wins / member notes if staff provided them
-5) What to leave out (yoga/coffee unless calendar is thin)
+5) What to leave out (yoga/coffee unless the calendar is thin)
 Keep tone warm, practical, not fundraising.
 """
             completion = client.chat.completions.create(
