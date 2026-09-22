@@ -1,7 +1,7 @@
 # Slack app manifest — create at https://api.slack.com/apps → "From a manifest"
 display_information:
   name: Volta Newsletter Tips
-  description: Drop a newsletter suggestion for Bader without leaving Slack.
+  description: Newsletter tips + founder consent DMs for the Volta desk.
   background_color: "#1a1a1a"
 features:
   bot_user:
@@ -17,7 +17,13 @@ oauth_config:
   scopes:
     bot:
       - commands
+      - chat:write
+      - im:write
+      - users:read
 settings:
+  interactivity:
+    is_enabled: true
+    request_url: https://volta-newsletter.fly.dev/slack/interactive
   org_deploy_enabled: false
   socket_mode_enabled: false
   token_rotation_enabled: false

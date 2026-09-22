@@ -376,6 +376,110 @@ def recommendations_consent(
     return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
 
 
+@app.post("/recommendations/{rec_id}/ask-slack")
+def recommendations_ask_slack(request: Request, rec_id: str):
+    """DM the mapped Slack user with Approve / Decline (replaces hand messaging)."""
+    from app.services import slack as slack_svc
+    from app.services.slack import SlackAuthError
+    from app.services.staff import SlackLookupError, resolve_slack_user_id
+
+    user, redirect = _require_user(request)
+    if redirect:
+        return redirect
+
+    rec = None
+    for item in storage.list_recommendations():
+        if item.get("_id") == rec_id:
+            rec = item
+            break
+    if not rec:
+        request.session["flash"] = "Recommendation not found."
+        return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
+
+    author = rec.get("author") or ""
+    try:
+        slack_uid = resolve_slack_user_id(author)
+        slack_svc.send_consent_request_dm(
+            slack_user_id=slack_uid,
+            rec_id=rec_id,
+            title=str(rec.get("title") or ""),
+            body=str(rec.get("body") or ""),
+            author=str(author),
+        )
+        storage.set_consent_status(rec_id, "pending")
+        request.session["flash"] = (
+            f"Slack consent request sent to {author} for “{rec.get('title')}”."
+        )
+    except SlackLookupError as exc:
+        request.session["flash"] = str(exc)
+    except SlackAuthError as exc:
+        request.session["flash"] = str(exc)
+    except Exception as exc:  # noqa: BLE001
+        request.session["flash"] = f"Couldn’t send Slack consent DM: {exc}"
+
+    return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.post("/slack/interactive")
+async def slack_interactive(request: Request):
+    """Slack Block Kit button callbacks → storage.set_consent_status."""
+    import json
+    from urllib.parse import parse_qs
+
+    from app.services import slack as slack_svc
+    from app.services.slack import SlackAuthError
+
+    raw = await request.body()
+    try:
+        slack_svc.verify_slack_request(
+            body=raw,
+            timestamp=request.headers.get("X-Slack-Request-Timestamp"),
+            signature=request.headers.get("X-Slack-Signature"),
+        )
+    except SlackAuthError as exc:
+        return JSONResponse({"ok": False, "error": str(exc)}, status_code=401)
+
+    form = {
+        k: (v[0] if v else "")
+        for k, v in parse_qs(raw.decode("utf-8"), keep_blank_values=True).items()
+    }
+    try:
+        payload = json.loads(form.get("payload") or "{}")
+    except json.JSONDecodeError:
+        return JSONResponse({"ok": False, "error": "Invalid payload"}, status_code=400)
+
+    actions = payload.get("actions") or []
+    if not actions:
+        return JSONResponse({"ok": True})
+
+    action = actions[0]
+    action_id = str(action.get("action_id") or "")
+    rec_id = str(action.get("value") or "")
+
+    try:
+        label, updated = slack_svc.apply_consent_action(action_id, rec_id)
+    except ValueError as exc:
+        return JSONResponse(
+            {"response_type": "ephemeral", "text": str(exc)},
+            status_code=200,
+        )
+
+    if not updated:
+        text = "That tip was not found in the desk — it may have been removed."
+    else:
+        text = (
+            f"Thanks — marked *{label}* for “{updated.get('title')}”. "
+            "Bader can see this on the newsletter desk."
+        )
+
+    return JSONResponse(
+        {
+            "replace_original": True,
+            "text": text,
+        }
+    )
+
+
 @app.post("/recommendations/{rec_id}/hold")
 def recommendations_hold(
     request: Request,

@@ -56,7 +56,8 @@ Set these in the host dashboard / `fly secrets set` — not in git:
 | `DEMO_MODE` | `true` until live Mailchimp |
 | `OPENAI_API_KEY` | optional |
 | `EMAIL_IN_TOKEN` | optional gate for `/ingest/email` |
-| `SLACK_SIGNING_SECRET` | required for `/slack/suggest` (Slack app Signing Secret) |
+| `SLACK_SIGNING_SECRET` | required for `/slack/suggest` + `/slack/interactive` |
+| `SLACK_BOT_TOKEN` | Bot User OAuth Token (`xoxb-…`) for consent DMs (`chat:write`, `im:write`) |
 | `SLACK_WEBHOOK_URL` | optional Incoming Webhook for `#newsletter-desk` (draft + send pings) |
 | `VOLTA_PUBLIC_URL` | optional public desk URL for Slack links (defaults to Fly app URL) |
 
@@ -143,6 +144,23 @@ If the webhook is missing or Slack is down, the build/send still succeeds — fa
 fly secrets set SLACK_WEBHOOK_URL=https://hooks.slack.com/services/... \
   VOLTA_PUBLIC_URL=https://volta-newsletter.fly.dev
 ```
+
+### Founder consent DMs (Ask in Slack)
+
+On **Staff recommendations**, tips with consent `not_requested` show **Ask in Slack**. That DMs the mapped person:
+
+> Volta wants to include this in the newsletter — OK to use it?  
+> **[Approve]** **[Decline]**
+
+Approve/Decline hits `POST /slack/interactive` (signed) and calls the same `storage.set_consent_status()` as the in-app buttons.
+
+**v1 limitation:** Slack user IDs are a manual map in `app/services/staff.py` → `SLACK_USER_IDS`. If someone isn’t listed, the desk shows a clear *“No Slack ID on file for …”* message — it does not fail silently.
+
+```bash
+fly secrets set SLACK_BOT_TOKEN=xoxb-...
+```
+
+Also set Interactivity Request URL to `https://volta-newsletter.fly.dev/slack/interactive` (see `slack-app-manifest.yaml`).
 
 ## Internal signals (manual)
 

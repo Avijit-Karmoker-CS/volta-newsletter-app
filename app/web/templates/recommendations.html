@@ -7,6 +7,7 @@
     Adding as {{ user.display_name }}. Staff can also tip without login via
     <a href="/suggest">/suggest</a> (email-in).
     Mark founder consent here — only <strong>approved</strong> stories enter the letter.
+    Use <strong>Ask in Slack</strong> to DM Approve / Decline (same as Bader messaging by hand today).
     Use <strong>Hold</strong> for “check back next month.”
   </p>
   {% if error %}<div class="error">{{ error }}</div>{% endif %}
@@ -39,6 +40,11 @@
           <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="declined">Declined</button>
           <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="not_requested">Reset</button>
         </form>
+        {% if r.consent_status == "not_requested" %}
+        <form class="consent-row" method="post" action="/recommendations/{{ r._id }}/ask-slack">
+          <button class="btn btn-primary btn-small" type="submit">Ask in Slack</button>
+        </form>
+        {% endif %}
         <form class="consent-row" method="post" action="/recommendations/{{ r._id }}/hold">
           <input type="hidden" name="held" value="1" />
           <button class="btn btn-ghost btn-small" type="submit">Hold for later</button>

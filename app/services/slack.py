@@ -123,6 +123,105 @@ def post_webhook(text: str) -> bool:
         return False
 
 
+def bot_token() -> str:
+    return (os.getenv("SLACK_BOT_TOKEN") or "").strip()
+
+
+def send_consent_request_dm(
+    *,
+    slack_user_id: str,
+    rec_id: str,
+    title: str,
+    body: str,
+    author: str,
+) -> dict[str, Any]:
+    """DM a person with Approve / Decline buttons via chat.postMessage."""
+    token = bot_token()
+    if not token:
+        raise SlackAuthError(
+            "SLACK_BOT_TOKEN is not configured. "
+            "Install the Slack app and set the Bot User OAuth Token."
+        )
+
+    text = (
+        f"Volta wants to include this in the newsletter — OK to use it?\n"
+        f"*{title}* (from {author})\n{body}"
+    )
+    blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (
+                    "*Volta wants to include this in the newsletter — OK to use it?*\n"
+                    f"*{title}* — _{author}_\n{body}"
+                ),
+            },
+        },
+        {
+            "type": "actions",
+            "block_id": f"consent_{rec_id}",
+            "elements": [
+                {
+                    "type": "button",
+                    "action_id": "consent_approve",
+                    "text": {"type": "plain_text", "text": "Approve"},
+                    "style": "primary",
+                    "value": rec_id,
+                },
+                {
+                    "type": "button",
+                    "action_id": "consent_decline",
+                    "text": {"type": "plain_text", "text": "Decline"},
+                    "style": "danger",
+                    "value": rec_id,
+                },
+            ],
+        },
+    ]
+
+    try:
+        resp = requests.post(
+            "https://slack.com/api/chat.postMessage",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json; charset=utf-8",
+            },
+            json={
+                "channel": slack_user_id,
+                "text": text,
+                "blocks": blocks,
+            },
+            timeout=8,
+        )
+        data = resp.json() if resp.content else {}
+    except requests.RequestException as exc:
+        raise SlackAuthError(f"Slack chat.postMessage failed: {exc}") from exc
+
+    if not data.get("ok"):
+        raise SlackAuthError(
+            f"Slack chat.postMessage error: {data.get('error') or resp.status_code}"
+        )
+    return data
+
+
+def apply_consent_action(action_id: str, rec_id: str) -> tuple[str, dict | None]:
+    """Map Slack button → storage.set_consent_status. Returns (label, updated)."""
+    from app.services import storage
+
+    if action_id == "consent_approve":
+        status = "approved"
+        label = "approved"
+    elif action_id == "consent_decline":
+        status = "declined"
+        label = "declined"
+    else:
+        raise ValueError(f"Unknown consent action: {action_id}")
+
+    updated = storage.set_consent_status(rec_id, status)
+    return label, updated
+
+
 def _story_count(draft: dict) -> int:
     return (
         len(draft.get("featured_public") or [])

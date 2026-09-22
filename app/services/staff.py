@@ -25,6 +25,64 @@ STAFF: dict[str, StaffMember] = {
 }
 
 
+# Manual Slack user IDs for consent DMs (open a profile → Copy member ID → U…).
+# Keys: staff username, display name, or any founder/contact name used as author.
+# Leave blank until filled for the Volta workspace — missing IDs surface a clear error.
+SLACK_USER_IDS: dict[str, str] = {
+    # "matt": "U012ABCDEF",
+    # "laura": "U012GHIJKL",
+    # "rishabh": "U012MNOPQR",
+    # "amy": "U012STUVWX",
+    # "bader": "U012YZABCD",
+    # "Jane Founder": "U0FOUNDER1",
+}
+
+
+class SlackLookupError(ValueError):
+    """Raised when we cannot map a person to a Slack user ID."""
+
+
+def resolve_slack_user_id(person: str) -> str:
+    """Look up a Slack user ID by author/display name. Never silently miss."""
+    raw = (person or "").strip()
+    if not raw:
+        raise SlackLookupError(
+            "No Slack ID on file for this person (empty name). "
+            "Add them in app/services/staff.py → SLACK_USER_IDS."
+        )
+
+    lower = raw.lower()
+    for key, uid in SLACK_USER_IDS.items():
+        if key.lower() == lower and (uid or "").strip():
+            return uid.strip()
+
+    for member in STAFF.values():
+        aliases = {
+            member.username.lower(),
+            member.display_name.lower(),
+        }
+        if member.email:
+            aliases.add(member.email.lower())
+            aliases.add(member.email.split("@", 1)[0].lower())
+        if lower in aliases:
+            uid = (
+                SLACK_USER_IDS.get(member.username)
+                or SLACK_USER_IDS.get(member.display_name)
+                or ""
+            ).strip()
+            if uid:
+                return uid
+            raise SlackLookupError(
+                f'No Slack ID on file for “{member.display_name}”. '
+                f'Add SLACK_USER_IDS["{member.username}"] = "U…" in app/services/staff.py.'
+            )
+
+    raise SlackLookupError(
+        f'No Slack ID on file for “{raw}”. '
+        f'Add SLACK_USER_IDS["{raw}"] = "U…" in app/services/staff.py.'
+    )
+
+
 def authenticate(username: str, pin: str) -> StaffMember | None:
     key = username.strip().lower()
     member = STAFF.get(key)
