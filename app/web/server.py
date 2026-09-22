@@ -51,12 +51,17 @@ def _require_user(request: Request):
 def _ctx(request: Request, **extra):
     user = _user(request)
     mc = mailchimp_svc.status()
+    from app.services import settings as settings_svc
+
     return {
         "request": request,
         "user": user,
         "mailchimp": mc,
         "staff_list": desk_logins(),
         "all_staff": list(STAFF.values()),
+        "cadence": settings_svc.newsletter_cadence(),
+        "cadence_label": settings_svc.cadence_label(),
+        "desk_title": settings_svc.desk_title(),
         **extra,
     }
 

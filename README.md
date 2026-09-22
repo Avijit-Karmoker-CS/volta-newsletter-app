@@ -21,6 +21,8 @@ Then open:
 
 Login: **Bader / 1111**
 
+Cadence defaults to **monthly** (`NEWSLETTER_CADENCE=monthly`). Change only deliberately — there is no nudge to send weekly.
+
 ### Demo flow
 
 1. **Build now** or **Customize**  

@@ -2,10 +2,11 @@
 {% block title %}Home · Volta Newsletter{% endblock %}
 {% block body %}
 <main class="wrap">
-  <h1>Monday newsletter desk</h1>
+  <h1>{{ desk_title }}</h1>
   <p class="muted">
-    {% if mailchimp.demo %}DEMO Mailchimp{% else %}LIVE Mailchimp{% endif %}
-    · works on phone &amp; desktop
+    Cadence: {{ cadence_label }}
+    · {% if mailchimp.demo %}DEMO Mailchimp{% else %}LIVE Mailchimp{% endif %}
+    · phone &amp; desktop
   </p>
 
   {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}

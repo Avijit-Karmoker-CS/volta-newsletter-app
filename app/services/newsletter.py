@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 from app.services import research as research_svc
+from app.services import settings as settings_svc
 from app.services import storage
+
 
 # Public hero image (email-safe absolute URL) — Halifax waterfront / community vibe
 HERO_IMAGE = (
@@ -16,9 +18,8 @@ HERO_IMAGE = (
 
 
 def week_of_label(day: datetime | None = None) -> str:
-    d = day or datetime.now()
-    monday = d - timedelta(days=d.weekday())
-    return monday.strftime("%Y-%m-%d")
+    """Issue period label (respects NEWSLETTER_CADENCE; default monthly)."""
+    return settings_svc.period_label(day)
 
 
 def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, Any]:
@@ -71,12 +72,14 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
         for r in pending[:6]
     ]
 
-    subject = f"This week at Volta — week of {week}"
+    subject = f"This month at Volta — {week}" if settings_svc.newsletter_cadence() == "monthly" else f"This week at Volta — week of {week}"
+    if settings_svc.newsletter_cadence() == "biweekly":
+        subject = f"Volta update — {week}"
     html = render_html(
         subject=subject,
         week_of=week,
         opening=(
-            "Here’s what’s on for the Volta community this week. "
+            "Here’s what’s on for the Volta community. "
             "Events first, then picks from Volta’s own activity and the team."
         ),
         featured_public=featured_public,
@@ -91,6 +94,7 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
 
     draft = {
         "week_of": week,
+        "cadence": settings_svc.newsletter_cadence(),
         "mode": "default",
         "subject": subject,
         "html": html,
@@ -122,7 +126,9 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
     week = week_of_label()
 
     narrative = packet.get("narrative") or ""
-    subject = "This week at Volta"
+    subject = "This month at Volta" if settings_svc.newsletter_cadence() == "monthly" else "This week at Volta"
+    if settings_svc.newsletter_cadence() == "biweekly":
+        subject = "Volta update"
     for line in narrative.splitlines():
         if line.lower().startswith("subject:"):
             subject = line.split(":", 1)[1].strip() or subject
@@ -189,6 +195,7 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
 
     draft = {
         "week_of": week,
+        "cadence": settings_svc.newsletter_cadence(),
         "mode": "custom",
         "subject": subject,
         "plan": plan,
@@ -320,7 +327,7 @@ def render_html(
           </tr>
           <tr>
             <td style="padding:28px 32px 20px;border-bottom:3px solid #c9a227;">
-              <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;color:#c9a227;text-transform:uppercase;">Week of {_escape(week_of)} · Halifax</p>
+              <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.22em;color:#c9a227;text-transform:uppercase;">{_escape(settings_svc.period_header(week_of))} · Halifax</p>
               <h1 style="margin:0;font-family:Georgia,serif;font-size:28px;line-height:1.2;color:#f7f1e4;font-weight:normal;">{_escape(subject)}</h1>
               <p style="margin:10px 0 0;font-family:Georgia,serif;font-size:16px;color:#c9a227;font-style:italic;">Builders, not bystanders.</p>
             </td>

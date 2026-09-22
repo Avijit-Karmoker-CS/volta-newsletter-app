@@ -178,7 +178,8 @@ def research_with_prompt(plan: str, staff_recs: list[dict]) -> dict[str, Any]:
             from openai import OpenAI
 
             client = OpenAI(api_key=api_key)
-            prompt = f"""You help Volta (Halifax innovation hub) draft a weekly community newsletter.
+            prompt = f"""You help Volta (Halifax innovation hub) draft a community newsletter.
+Cadence is monthly by default — do not push for a weekly habit.
 Bader's plan / prompt:
 {plan}
 
@@ -247,9 +248,9 @@ def _heuristic_narrative(
     staff_recs: list[dict],
 ) -> str:
     lines = [
-        "Subject: This week at Volta — gatherings for builders",
+        "Subject: This month at Volta — gatherings for builders",
         "",
-        "Opening: Here’s what’s on for the Volta community this week — events first, then anything staff flagged for founders and builders.",
+        "Opening: Here’s what’s on for the Volta community — events first, then anything staff flagged for founders and builders.",
         "",
         f"Bader’s note: {plan.strip() or 'Use the popular template (events + staff picks).'}",
         "",

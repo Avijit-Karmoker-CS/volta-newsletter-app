@@ -8,6 +8,7 @@ import customtkinter as ctk
 
 from app.services import mailchimp_svc
 from app.services import newsletter as newsletter_svc
+from app.services import settings as settings_svc
 from app.services import storage
 from app.services.staff import StaffMember, can_send
 
@@ -30,7 +31,7 @@ class HomeFrame(ctk.CTkFrame):
         ).pack(anchor="w")
         ctk.CTkLabel(
             header,
-            text=f"Monday newsletter desk · {user.display_name}",
+            text=f"{settings_svc.desk_title()} · {user.display_name}",
             font=ctk.CTkFont(size=26, weight="bold"),
         ).pack(anchor="w", pady=(4, 0))
         ctk.CTkLabel(
