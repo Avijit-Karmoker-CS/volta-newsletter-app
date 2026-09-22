@@ -234,7 +234,10 @@ def save_send_log(result: dict) -> Path:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     cid = (result.get("campaign_id") or "unknown")[-12:]
     path = data_dir() / "sends" / f"{stamp}_{cid}.json"
-    _write(path, result)
+    payload = dict(result)
+    payload.setdefault("outcome", "")
+    payload.setdefault("outcome_updated_at", None)
+    _write(path, payload)
     return path
 
 
@@ -244,8 +247,24 @@ def list_send_logs() -> list[dict]:
         item = _read(path, None)
         if isinstance(item, dict):
             item["_id"] = path.stem
+            item.setdefault("outcome", "")
             items.append(item)
     return items
+
+
+def update_send_outcome(send_id: str, outcome: str) -> dict | None:
+    """Manual note on what happened after a send (attendance, signups — not Mailchimp opens)."""
+    path = data_dir() / "sends" / f"{send_id}.json"
+    if not path.exists():
+        return None
+    payload = _read(path, {})
+    if not isinstance(payload, dict):
+        return None
+    payload["outcome"] = (outcome or "").strip()
+    payload["outcome_updated_at"] = utc_now()
+    _write(path, payload)
+    payload["_id"] = path.stem
+    return payload
 
 
 def seed_recommendations_if_empty() -> int:

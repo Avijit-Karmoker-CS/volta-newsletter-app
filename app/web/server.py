@@ -491,7 +491,32 @@ def history_page(request: Request):
     if redirect:
         return redirect
     logs = storage.list_send_logs()
-    return templates.TemplateResponse("history.html", _ctx(request, logs=logs))
+    flash = request.session.pop("flash", None)
+    return templates.TemplateResponse(
+        "history.html",
+        _ctx(request, logs=logs, flash=flash),
+    )
+
+
+@app.post("/history/{send_id}/outcome")
+def history_outcome(
+    request: Request,
+    send_id: str,
+    outcome: str = Form(""),
+):
+    """Manual downstream outcome (attendance / signups) — not Mailchimp opens."""
+    user, redirect = _require_user(request)
+    if redirect:
+        return redirect
+    if not can_send(user):
+        request.session["flash"] = "Only Bader or Matt can update outcomes."
+        return RedirectResponse("/history", status_code=status.HTTP_303_SEE_OTHER)
+    updated = storage.update_send_outcome(send_id, outcome)
+    if not updated:
+        request.session["flash"] = "Send log not found."
+    else:
+        request.session["flash"] = "Outcome saved."
+    return RedirectResponse("/history", status_code=status.HTTP_303_SEE_OTHER)
 
 
 def local_ip() -> str:

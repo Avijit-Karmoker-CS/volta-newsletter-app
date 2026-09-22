@@ -3,6 +3,12 @@
 {% block body %}
 <main class="wrap">
   <h1>Send history</h1>
+  <p class="muted">
+    Opens/clicks stay in Mailchimp. Log outcomes Mailchimp can’t see —
+    registrations, attendance, program signups — by hand here.
+  </p>
+  {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+
   <div class="card">
     {% for item in logs %}
     <div class="log-item">
@@ -10,6 +16,27 @@
       {{ item.created_at }} · {{ item.campaign_id }}
       <p><strong>{{ item.subject }}</strong></p>
       <p class="muted">{{ item.recipient_count or 0 }} recipients · {{ item.status }}</p>
+
+      {% if item.outcome %}
+      <p class="outcome"><strong>Outcome:</strong> {{ item.outcome }}</p>
+      {% if item.outcome_updated_at %}
+      <p class="muted">Updated {{ item.outcome_updated_at }}</p>
+      {% endif %}
+      {% else %}
+      <p class="muted">No outcome logged yet.</p>
+      {% endif %}
+
+      <form class="outcome-form" method="post" action="/history/{{ item._id }}/outcome">
+        <label for="outcome-{{ item._id }}">What happened after this send?</label>
+        <input
+          id="outcome-{{ item._id }}"
+          name="outcome"
+          type="text"
+          value="{{ item.outcome or '' }}"
+          placeholder="e.g. 42 registered for the AI showcase after this issue"
+        />
+        <button class="btn btn-ghost btn-small" type="submit">Save outcome</button>
+      </form>
     </div>
     {% else %}
     <p class="muted">No sends yet.</p>

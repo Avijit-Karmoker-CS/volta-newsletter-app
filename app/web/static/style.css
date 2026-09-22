@@ -277,6 +277,18 @@ textarea.code {
 .held-section {
   border-color: #3a3a55;
 }
+.outcome {
+  margin: 8px 0;
+  color: #d6d0c6;
+}
+.outcome-form {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+.outcome-form input[type="text"] {
+  width: 100%;
+}
 .consent-row {
   display: flex;
   flex-wrap: wrap;
