@@ -8,7 +8,7 @@ Mailchimp sends the newsletter. It doesn't know what should go in it, and it can
 
 Open the fixed desk URL (set after deploy — see **Hosting** below):
 
-**Desk:** https://YOUR-APP.fly.dev
+**Desk:** https://volta-newsletter.fly.dev
 
 Login: **Bader / 1111** (Matt `2222`, Laura `4444`, …)
 
@@ -72,6 +72,8 @@ fly deploy
 
 Then put the printed `https://….fly.dev` URL at the top of this README (and share it with Bader).
 
+Live desk (already deployed): **https://volta-newsletter.fly.dev**
+
 ## Local development (optional)
 
 Only for hacking on the code — not how Bader should use the desk day to day.
@@ -93,7 +95,7 @@ Optional terminal UI: `python main.py --tui`
 ## Email-in (no login)
 
 ```bash
-curl -s -X POST https://YOUR-APP.fly.dev/ingest/email \
+curl -s -X POST https://volta-newsletter.fly.dev/ingest/email \
   -H 'Content-Type: application/json' \
   -d '{"from":"laura@voltaeffect.com","subject":"Member win","body":"New resident closed a pilot."}'
 ```
