@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Suggest for the newsletter · Volta{% endblock %}
+{% block body %}
+<main class="wrap">
+  <div class="brand" style="margin-top:12px">VOLTA</div>
+  <h1>Suggest for this week’s newsletter</h1>
+  <p class="muted">
+    No login. This simulates emailing
+    <strong>newsletter-tips@voltaeffect.com</strong>
+    — subject becomes the title, body is your note. Bader picks it up in the desk.
+  </p>
+
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+
+  <form class="card" method="post" action="/ingest/email">
+    <input type="hidden" name="via" value="form" />
+    <p>
+      <label for="sender">From (your name or Volta email)</label>
+      <input id="sender" name="sender" type="text" required
+             placeholder="laura@voltaeffect.com" list="staff-emails" />
+      <datalist id="staff-emails">
+        <option value="laura@voltaeffect.com">
+        <option value="rishabh@voltaeffect.com">
+        <option value="amy@voltaeffect.com">
+        <option value="matt@voltaeffect.com">
+      </datalist>
+    </p>
+    <p>
+      <label for="subject">Subject</label>
+      <input id="subject" name="subject" type="text" required placeholder="What should go in" />
+    </p>
+    <p>
+      <label for="body">Body</label>
+      <textarea id="body" name="body" required placeholder="Details for the letter"></textarea>
+    </p>
+    <button class="btn btn-primary" type="submit">Send suggestion</button>
+  </form>
+
+  <p class="hint">
+    API demo:
+    <code>POST /ingest/email</code> with JSON
+    <code>{"from","subject","body"}</code>
+  </p>
+  <p class="muted"><a href="/login">Bader / Matt desk login →</a></p>
+</main>
+{% endblock %}

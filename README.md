@@ -31,11 +31,26 @@ Login: **Bader / 1111**
 
 Staff (Laura `4444`, Matt `2222`, etc.) can add recommendations from their phones too.
 
+Staff (Laura, etc.) tip without logging in: open **/suggest** or
+`POST /ingest/email` with `{"from","subject","body"}`.
+
 ## Optional terminal UI
 
 ```bash
 python main.py --tui
 ```
+
+## Email-in (no login)
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/ingest/email \
+  -H 'Content-Type: application/json' \
+  -d '{"from":"laura@voltaeffect.com","subject":"Member win","body":"New resident closed a pilot."}'
+```
+
+Or open http://127.0.0.1:8000/suggest on a phone. Same as the in-app recommendations form — Bader sees it in the desk inbox.
+
+Optional: set `EMAIL_IN_TOKEN` in `.env` and send header `X-Volta-Ingest-Token`.
 
 ## Live Mailchimp later
 

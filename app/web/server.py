@@ -8,15 +8,17 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, Form, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
+from app.services import ingest as ingest_svc
 from app.services import mailchimp_svc
 from app.services import newsletter as newsletter_svc
 from app.services import storage
-from app.services.staff import STAFF, authenticate, can_send
+from app.services.ingest import IngestError
+from app.services.staff import STAFF, authenticate, can_send, desk_logins
 
 BASE = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
@@ -52,7 +54,8 @@ def _ctx(request: Request, **extra):
         "request": request,
         "user": user,
         "mailchimp": mc,
-        "staff_list": list(STAFF.values()),
+        "staff_list": desk_logins(),
+        "all_staff": list(STAFF.values()),
         **extra,
     }
 
@@ -67,6 +70,65 @@ def root(request: Request):
     if _user(request):
         return RedirectResponse("/home", status_code=status.HTTP_303_SEE_OTHER)
     return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.get("/suggest", response_class=HTMLResponse)
+def suggest_page(request: Request):
+    """No-login page that simulates emailing a tip into the newsletter desk."""
+    flash = request.session.pop("flash", None)
+    error = request.session.pop("error", None)
+    return templates.TemplateResponse(
+        "suggest.html",
+        _ctx(request, flash=flash, error=error),
+    )
+
+
+@app.post("/ingest/email")
+async def ingest_email(request: Request):
+    """Simulate email-in: create a recommendation without logging into the app.
+
+    Accepts JSON: {"from"|"sender", "subject", "body", optional "token"}
+    or form fields (from the /suggest page).
+    """
+    content_type = (request.headers.get("content-type") or "").lower()
+    token = request.headers.get("X-Volta-Ingest-Token")
+    via_form = False
+
+    if "application/json" in content_type:
+        payload = await request.json()
+        sender = str(payload.get("from") or payload.get("sender") or "")
+        subject = str(payload.get("subject") or "")
+        body = str(payload.get("body") or payload.get("text") or "")
+        token = str(payload.get("token") or token or "")
+    else:
+        form = await request.form()
+        sender = str(form.get("sender") or form.get("from") or "")
+        subject = str(form.get("subject") or "")
+        body = str(form.get("body") or "")
+        token = str(form.get("token") or token or "")
+        via_form = str(form.get("via") or "") == "form"
+
+    try:
+        result = ingest_svc.ingest_email_recommendation(
+            subject=subject,
+            body=body,
+            sender=sender,
+            token=token,
+        )
+    except IngestError as exc:
+        if via_form:
+            request.session["error"] = str(exc)
+            return RedirectResponse("/suggest", status_code=status.HTTP_303_SEE_OTHER)
+        return JSONResponse({"ok": False, "error": str(exc)}, status_code=400)
+
+    if via_form:
+        request.session["flash"] = (
+            f"Thanks {result['author']} — “{result['title']}” is in Bader’s inbox "
+            "(no app login needed)."
+        )
+        return RedirectResponse("/suggest", status_code=status.HTTP_303_SEE_OTHER)
+
+    return JSONResponse(result, status_code=201)
 
 
 @app.get("/login", response_class=HTMLResponse)

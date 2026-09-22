@@ -5,10 +5,10 @@
   <form class="login-card" method="post" action="/login">
     <div class="brand">VOLTA</div>
     <h1>Newsletter desk</h1>
-    <p class="muted">Internal · phone &amp; desktop</p>
+    <p class="muted">Bader &amp; Matt · phone &amp; desktop</p>
     {% if error %}<div class="error">{{ error }}</div>{% endif %}
     <p>
-      <label for="username">Staff</label>
+      <label for="username">Desk login</label>
       <select id="username" name="username" required>
         {% for m in staff_list %}
         <option value="{{ m.username }}" {% if m.username == 'bader' %}selected{% endif %}>{{ m.display_name }}</option>
@@ -20,7 +20,11 @@
       <input id="pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Bader = 1111" required />
     </p>
     <button class="btn btn-primary" type="submit">Enter desk</button>
-    <p class="hint">PINs: Bader 1111 · Matt 2222 · Rishabh 3333 · Laura 4444 · Amy 5555</p>
+    <p class="hint">Desk PINs: Bader 1111 · Matt 2222</p>
+    <p class="hint">
+      Staff tips without logging in:
+      <a href="/suggest">email-in / suggest →</a>
+    </p>
   </form>
 </div>
 {% endblock %}
