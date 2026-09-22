@@ -36,7 +36,7 @@ class HomeFrame(ctk.CTkFrame):
         ).pack(anchor="w", pady=(4, 0))
         ctk.CTkLabel(
             header,
-            text="Default path uses the popular template + open staff recommendations. Customize when you have a plan.",
+            text="This desk decides what goes in and gates consent. Mailchimp still sends.",
             text_color="#9a958c",
             wraplength=760,
             justify="left",
@@ -48,7 +48,7 @@ class HomeFrame(ctk.CTkFrame):
         self._card(
             grid,
             "Generate default",
-            "One click: popular template + staff picks + community signals. No prompt needed.",
+            "Open staff picks plus consent-approved public and internal signals in the default letter shape.",
             "Build from template",
             self._generate_default,
             0,
@@ -56,7 +56,7 @@ class HomeFrame(ctk.CTkFrame):
         self._card(
             grid,
             "Customize",
-            "Prompt your plan. Research trending builder/community topics and fold in Matt, Rishabh, Laura, Amy…",
+            "Your prompt plus research, staff recs, and only consent-approved Volta signals — then you decide what makes the cut.",
             "Customize newsletter",
             lambda: self.navigate("customize"),
             1,
@@ -65,7 +65,7 @@ class HomeFrame(ctk.CTkFrame):
         self._card(
             grid,
             "Staff recommendations",
-            "Everyone on staff can drop what should go in this week’s letter.",
+            "Everyone on staff can drop what should go in this issue.",
             "Open inbox",
             lambda: self.navigate("recommendations"),
             2,

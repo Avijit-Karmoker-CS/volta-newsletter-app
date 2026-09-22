@@ -2,6 +2,8 @@
 
 Internal newsletter desk for **Bader and staff** — works on **phone and desktop** in a browser.
 
+Mailchimp sends the newsletter. It doesn't know what should go in it, and it can't ask a founder for permission or catch a story sitting in your team's own meeting notes. This app decides what goes in, tracks who suggested it, and gets permission to use it — without the manual chasing. Bader still hits send in Mailchimp exactly like today. Leadership doesn't log into anything new — they just get asked, and you can finally see whether what you flagged made it in.
+
 Same Wi‑Fi → open the printed Phone URL on your phone. Desktop → open localhost.
 
 ## Quick start (phone + desktop)

@@ -65,7 +65,7 @@ class ReviewFrame(ctk.CTkFrame):
         )
         ctk.CTkLabel(
             right,
-            text="Select who receives this issue, review the letter, then send with one click.",
+            text="Select who receives this issue, review inclusion and consent, then hand off to Mailchimp to send.",
             wraplength=300,
             justify="left",
             text_color="#9a958c",
