@@ -88,7 +88,7 @@ def set_consent_status(rec_id: str, status: str) -> dict | None:
 
 
 def draft_unapproved_stories(draft: dict | None) -> list[dict]:
-    """Stories in the draft that are missing approved founder consent."""
+    """Stories in the draft that are missing approved founder/internal consent."""
     if not draft:
         return []
     bad: list[dict] = []
@@ -101,6 +101,19 @@ def draft_unapproved_stories(draft: dict | None) -> list[dict]:
                     "title": block.get("title"),
                     "consent_status": status,
                     "_id": block.get("_id"),
+                    "kind": "staff",
+                }
+            )
+    for item in draft.get("featured_internal") or []:
+        status = normalize_consent(item.get("consent_status"))
+        if status != "approved":
+            bad.append(
+                {
+                    "author": "Volta internal",
+                    "title": item.get("title"),
+                    "consent_status": status,
+                    "_id": item.get("_id"),
+                    "kind": "internal",
                 }
             )
     return bad

@@ -26,6 +26,11 @@
       <p class="muted">Inbox from email-in + optional in-app form. Staff tip without login: /suggest</p>
       <span class="btn">Open inbox</span>
     </a>
+    <a class="card" href="/internal" style="color:inherit">
+      <strong>From Volta's own activity</strong>
+      <p class="muted">Internal attendance / Bridge / call notes (consent-gated). Manual JSON for now.</p>
+      <span class="btn">Open internal signals</span>
+    </a>
     <a class="card span-2" href="/review" style="color:inherit">
       <strong>Review &amp; send</strong>
       <p class="muted">Preview the letter, pick community, email with one tap.</p>
@@ -38,6 +43,12 @@
     {% if draft %}
       <p>{{ draft.week_of }} · {{ draft.mode }} · {{ draft.status }}</p>
       <p>{{ draft.subject }}</p>
+      {% if draft.featured_public or draft.featured_internal %}
+      <p class="muted" style="margin-top:10px">
+        Public web: {{ draft.featured_public|length if draft.featured_public else 0 }}
+        · From Volta's own activity: {{ draft.featured_internal|length if draft.featured_internal else 0 }}
+      </p>
+      {% endif %}
     {% else %}
       <p class="muted">No draft yet — build or customize.</p>
     {% endif %}

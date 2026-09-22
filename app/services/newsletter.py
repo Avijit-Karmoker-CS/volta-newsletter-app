@@ -22,28 +22,42 @@ def week_of_label(day: datetime | None = None) -> str:
 
 
 def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, Any]:
-    """Popular template: staff recommendations + trending community signals."""
+    """Popular template: staff recommendations + public + internal signals."""
     recs = staff_recs if staff_recs is not None else storage.list_recommendations()
-    # Only stories Bader has founder consent for (approved) enter the letter
     pending = [
         r
         for r in recs
         if not r.get("included")
         and storage.normalize_consent(r.get("consent_status")) == "approved"
     ]
-    signals = research_svc.fetch_public_signals()
+    public_signals = research_svc.fetch_public_signals()
+    internal_signals = research_svc.fetch_internal_signals(approved_only=True)
     week = week_of_label()
 
-    featured = []
-    for s in signals[:3]:
-        featured.append(
-            {
-                "title": s["title"],
-                "detail": s["summary"],
-                "cta": "See Eventbrite / Volta events",
-                "when": "This week",
-            }
-        )
+    featured_public = [
+        {
+            "title": s["title"],
+            "detail": s["summary"],
+            "cta": "See Eventbrite / Volta events",
+            "when": "This week",
+            "origin": "public",
+            "origin_label": "Public web signal",
+        }
+        for s in public_signals[:3]
+    ]
+    featured_internal = [
+        {
+            "title": s["title"],
+            "detail": s["summary"],
+            "cta": "Learn more",
+            "when": "From Volta's own activity",
+            "origin": "internal",
+            "origin_label": "From Volta's own activity",
+            "_id": s.get("_id"),
+            "consent_status": s.get("consent_status"),
+        }
+        for s in internal_signals[:3]
+    ]
 
     staff_blocks = [
         {
@@ -62,9 +76,10 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
         week_of=week,
         opening=(
             "Here’s what’s on for the Volta community this week. "
-            "Events first, then picks from the team."
+            "Events first, then picks from Volta’s own activity and the team."
         ),
-        featured=featured,
+        featured_public=featured_public,
+        featured_internal=featured_internal,
         staff_blocks=staff_blocks,
         footer=(
             "Door note: main entrance closed for construction — use Entrance 2 "
@@ -78,9 +93,13 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
         "mode": "default",
         "subject": subject,
         "html": html,
-        "featured": featured,
+        "featured": featured_public + featured_internal,
+        "featured_public": featured_public,
+        "featured_internal": featured_internal,
         "staff_blocks": staff_blocks,
-        "signals": signals,
+        "signals": public_signals,
+        "public_signals": public_signals,
+        "internal_signals": internal_signals,
         "status": "draft",
     }
     storage.save_draft(draft)
@@ -107,16 +126,35 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
             subject = line.split(":", 1)[1].strip() or subject
             break
 
-    featured = []
-    for s in packet.get("signals", [])[:3]:
-        featured.append(
-            {
-                "title": s["title"],
-                "detail": s["summary"],
-                "cta": "Register / learn more",
-                "when": "This week",
-            }
-        )
+    public_signals = packet.get("public_signals") or research_svc.fetch_public_signals()
+    internal_signals = packet.get("internal_signals") or research_svc.fetch_internal_signals(
+        approved_only=True
+    )
+
+    featured_public = [
+        {
+            "title": s["title"],
+            "detail": s["summary"],
+            "cta": "Register / learn more",
+            "when": "This week",
+            "origin": "public",
+            "origin_label": "Public web signal",
+        }
+        for s in public_signals[:3]
+    ]
+    featured_internal = [
+        {
+            "title": s["title"],
+            "detail": s["summary"],
+            "cta": "Learn more",
+            "when": "From Volta's own activity",
+            "origin": "internal",
+            "origin_label": "From Volta's own activity",
+            "_id": s.get("_id"),
+            "consent_status": s.get("consent_status"),
+        }
+        for s in internal_signals[:3]
+    ]
 
     staff_blocks = [
         {
@@ -130,14 +168,15 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
     ]
 
     opening = (
-        "Built from Bader’s plan, team recommendations, and what’s drawing "
-        "builders and founders this week."
+        "Built from Bader’s plan, team recommendations, public signals, and "
+        "Volta’s own activity (consent-approved)."
     )
     html = render_html(
         subject=subject,
         week_of=week,
         opening=opening,
-        featured=featured,
+        featured_public=featured_public,
+        featured_internal=featured_internal,
         staff_blocks=staff_blocks,
         footer=(
             "Door note: main entrance closed for construction — use Entrance 2 "
@@ -152,9 +191,13 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
         "subject": subject,
         "plan": plan,
         "html": html,
-        "featured": featured,
+        "featured": featured_public + featured_internal,
+        "featured_public": featured_public,
+        "featured_internal": featured_internal,
         "staff_blocks": staff_blocks,
         "research": packet,
+        "public_signals": public_signals,
+        "internal_signals": internal_signals,
         "status": "draft",
     }
     storage.save_draft(draft)
@@ -162,21 +205,8 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
     return draft
 
 
-def render_html(
-    *,
-    subject: str,
-    week_of: str,
-    opening: str,
-    featured: list[dict],
-    staff_blocks: list[dict],
-    footer: str,
-    mode: str,
-    research_notes: str | None = None,  # kept for API compat; not shown to recipients
-) -> str:
-    """Recipient-facing email HTML (looks like the real inbox message)."""
-    _ = research_notes  # internal only — never render in the sent letter
-
-    featured_html = "".join(
+def _featured_rows(items: list[dict]) -> str:
+    return "".join(
         f"""
         <tr>
           <td style="padding:0 0 14px 0;">
@@ -201,8 +231,44 @@ def render_html(
           </td>
         </tr>
         """
-        for item in featured
+        for item in items
     )
+
+
+def render_html(
+    *,
+    subject: str,
+    week_of: str,
+    opening: str,
+    featured_public: list[dict] | None = None,
+    featured_internal: list[dict] | None = None,
+    staff_blocks: list[dict] | None = None,
+    footer: str,
+    mode: str,
+    research_notes: str | None = None,
+    featured: list[dict] | None = None,  # legacy alias
+) -> str:
+    """Recipient-facing email HTML (looks like the real inbox message)."""
+    _ = research_notes
+    featured_public = list(featured_public or [])
+    featured_internal = list(featured_internal or [])
+    staff_blocks = list(staff_blocks or [])
+    if featured and not featured_public and not featured_internal:
+        featured_public = [f for f in featured if f.get("origin") != "internal"]
+        featured_internal = [f for f in featured if f.get("origin") == "internal"]
+
+    public_html = _featured_rows(featured_public)
+    internal_section = ""
+    if featured_internal:
+        internal_section = f"""
+          <tr>
+            <td style="padding:16px 32px 8px;">
+              <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;color:#c9a227;text-transform:uppercase;">From Volta's own activity</p>
+              <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#b7aea0;">Internal attendance, programs, and notes — only items with founder/staff consent.</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{_featured_rows(featured_internal)}</table>
+            </td>
+          </tr>
+        """
 
     staff_html = ""
     if staff_blocks:
@@ -264,10 +330,12 @@ def render_html(
           </tr>
           <tr>
             <td style="padding:16px 32px 8px;">
-              <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;color:#c9a227;text-transform:uppercase;">This week · gatherings</p>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{featured_html}</table>
+              <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;color:#c9a227;text-transform:uppercase;">This week · gatherings</p>
+              <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#b7aea0;">Public web signal</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{public_html}</table>
             </td>
           </tr>
+          {internal_section}
           {staff_html}
           <tr>
             <td style="padding:20px 32px 28px;border-top:1px solid #1a2f42;">

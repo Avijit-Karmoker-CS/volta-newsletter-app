@@ -16,6 +16,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.services import ingest as ingest_svc
 from app.services import mailchimp_svc
 from app.services import newsletter as newsletter_svc
+from app.services import research as research_svc
 from app.services import storage
 from app.services.ingest import IngestError
 from app.services.staff import STAFF, authenticate, can_send, desk_logins
@@ -310,7 +311,7 @@ def review_page(request: Request):
 
 
 def _sync_draft_consent(draft: dict) -> None:
-    """Attach live consent_status onto draft staff_blocks from storage."""
+    """Attach live consent_status onto draft staff_blocks / internal features."""
     by_id = {r.get("_id"): r for r in storage.list_recommendations()}
     for block in draft.get("staff_blocks") or []:
         rid = block.get("_id")
@@ -322,7 +323,52 @@ def _sync_draft_consent(draft: dict) -> None:
             block["consent_status"] = storage.normalize_consent(
                 block.get("consent_status")
             )
+
+    internal_live = {s.get("_id"): s for s in research_svc.fetch_internal_signals()}
+    for item in draft.get("featured_internal") or []:
+        rid = item.get("_id")
+        if rid and rid in internal_live:
+            item["consent_status"] = storage.normalize_consent(
+                internal_live[rid].get("consent_status")
+            )
+        else:
+            item["consent_status"] = storage.normalize_consent(
+                item.get("consent_status")
+            )
     storage.save_draft(draft)
+
+
+@app.get("/internal", response_class=HTMLResponse)
+def internal_page(request: Request):
+    user, redirect = _require_user(request)
+    if redirect:
+        return redirect
+    flash = request.session.pop("flash", None)
+    signals = research_svc.fetch_internal_signals(approved_only=False)
+    return templates.TemplateResponse(
+        "internal.html",
+        _ctx(request, signals=signals, flash=flash),
+    )
+
+
+@app.post("/internal/{signal_id}/consent")
+def internal_consent(
+    request: Request,
+    signal_id: str,
+    consent_status: str = Form(...),
+):
+    user, redirect = _require_user(request)
+    if redirect:
+        return redirect
+    updated = research_svc.set_internal_consent(signal_id, consent_status)
+    if not updated:
+        request.session["flash"] = "Internal signal not found."
+    else:
+        request.session["flash"] = (
+            f"Consent → {storage.normalize_consent(updated.get('consent_status'))} "
+            f"for “{updated.get('title')}”."
+        )
+    return RedirectResponse("/internal", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @app.get("/preview", response_class=HTMLResponse)

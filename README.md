@@ -52,6 +52,10 @@ Or open http://127.0.0.1:8000/suggest on a phone. Same as the in-app recommendat
 
 Optional: set `EMAIL_IN_TOKEN` in `.env` and send header `X-Volta-Ingest-Token`.
 
+## Internal signals (manual)
+
+Drop JSON files in `data/internal/` (attendance, Bridge, call notes). Each needs `consent_status`. Only **approved** items appear under **From Volta's own activity** in the letter. Toggle consent in the desk at `/internal`.
+
 ## Live Mailchimp later
 
 In `.env`:

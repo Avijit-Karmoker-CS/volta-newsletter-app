@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Internal signals · Volta Newsletter{% endblock %}
+{% block body %}
+<main class="wrap">
+  <h1>From Volta's own activity</h1>
+  <p class="muted">
+    Manual internal signals (attendance, Bridge, call notes) from
+    <code>data/internal/</code>. Not a live calendar/transcript hookup yet —
+    prove the idea first. Only <strong>approved</strong> items enter the letter.
+  </p>
+  {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+
+  <div class="card">
+    {% for s in signals %}
+      <div class="log-item">
+        <span class="badge consent-{{ s.consent_status }}">Consent: {{ s.consent_status }}</span>
+        <span class="badge demo">{{ s.kind }}</span>
+        <strong>{{ s.title }}</strong>
+        <p class="muted">{{ s.summary }}</p>
+        {% if s.source_note %}<p class="muted">{{ s.source_note }}</p>{% endif %}
+        <form class="consent-row" method="post" action="/internal/{{ s._id }}/consent">
+          <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="pending">Request</button>
+          <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="approved">Approved</button>
+          <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="declined">Declined</button>
+          <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="not_requested">Reset</button>
+        </form>
+      </div>
+    {% else %}
+      <p class="muted">No files in data/internal/ yet.</p>
+    {% endfor %}
+  </div>
+
+  <a class="btn btn-ghost" href="/home">Back</a>
+</main>
+{% endblock %}
