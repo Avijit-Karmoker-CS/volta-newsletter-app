@@ -57,6 +57,8 @@ Set these in the host dashboard / `fly secrets set` — not in git:
 | `OPENAI_API_KEY` | optional |
 | `EMAIL_IN_TOKEN` | optional gate for `/ingest/email` |
 | `SLACK_SIGNING_SECRET` | required for `/slack/suggest` (Slack app Signing Secret) |
+| `SLACK_WEBHOOK_URL` | optional Incoming Webhook for `#newsletter-desk` (draft + send pings) |
+| `VOLTA_PUBLIC_URL` | optional public desk URL for Slack links (defaults to Fly app URL) |
 
 The app **refuses to start** on Fly/Render/Railway if `VOLTA_SESSION_SECRET` is missing or still the local demo default.
 
@@ -127,6 +129,20 @@ fly secrets set SLACK_SIGNING_SECRET=your-signing-secret
 5. **Install App** to the Volta workspace. Matt / Rishabh / Laura / Amy can use the command immediately — no desk login.
 
 Unsigned or forged Slack posts are rejected with HTTP 401. If `SLACK_SIGNING_SECRET` is unset, the endpoint refuses all requests.
+
+### Channel notifications (`#newsletter-desk`)
+
+When `SLACK_WEBHOOK_URL` is set (Incoming Webhook into `#newsletter-desk`):
+
+1. **Draft built** — subject, story count, short includes list, link to `/review`
+2. **Send confirmed** — recipient count, plus which pending staff tips did **not** make this issue (so Matt/Laura don’t have to open the app to check)
+
+If the webhook is missing or Slack is down, the build/send still succeeds — failures are logged only.
+
+```bash
+fly secrets set SLACK_WEBHOOK_URL=https://hooks.slack.com/services/... \
+  VOLTA_PUBLIC_URL=https://volta-newsletter.fly.dev
+```
 
 ## Internal signals (manual)
 

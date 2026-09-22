@@ -566,12 +566,25 @@ async def review_send(request: Request):
         draft["status"] = "sent_demo" if result.get("demo") else "sent"
         draft["mailchimp"] = result
         storage.save_draft(draft)
+        # Capture left-out tips BEFORE marking included for this send.
+        from app.services import slack as slack_svc
+
+        left_out = slack_svc.recommendations_left_out(draft)
         # Only recs that made it into this draft's staff_blocks (pending[:6])
         storage.mark_draft_staff_recs_included(draft)
         mode = "DEMO" if result.get("demo") else "LIVE"
         request.session["flash"] = (
             f"{mode} send complete · {len(selected)} members · campaign {result.get('campaign_id')}"
         )
+        try:
+            slack_svc.notify_send_complete(
+                draft=draft,
+                recipient_count=len(selected),
+                demo=bool(result.get("demo")),
+                left_out=left_out,
+            )
+        except Exception:  # noqa: BLE001 — never block a real send on Slack
+            pass
     except Exception as exc:  # noqa: BLE001
         request.session["flash"] = f"Send failed: {exc}"
 

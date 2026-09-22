@@ -109,6 +109,12 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
     }
     storage.save_draft(draft)
     storage.save_html(html, week)
+    try:
+        from app.services import slack as slack_svc
+
+        slack_svc.notify_draft_built(draft)
+    except Exception:  # noqa: BLE001 — never block a build on Slack
+        pass
     return draft
 
 
@@ -211,6 +217,12 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
     }
     storage.save_draft(draft)
     storage.save_html(html, week)
+    try:
+        from app.services import slack as slack_svc
+
+        slack_svc.notify_draft_built(draft)
+    except Exception:  # noqa: BLE001 — never block a build on Slack
+        pass
     return draft
 
 
