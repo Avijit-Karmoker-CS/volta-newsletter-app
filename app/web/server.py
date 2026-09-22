@@ -84,6 +84,7 @@ def suggest_page(request: Request):
     flash = request.session.pop("flash", None)
     error = request.session.pop("error", None)
     return templates.TemplateResponse(
+        request,
         "suggest.html",
         _ctx(request, flash=flash, error=error),
     )
@@ -141,7 +142,11 @@ async def ingest_email(request: Request):
 def login_page(request: Request):
     if _user(request):
         return RedirectResponse("/home", status_code=status.HTTP_303_SEE_OTHER)
-    return templates.TemplateResponse("login.html", _ctx(request, error=None))
+    return templates.TemplateResponse(
+        request,
+        "login.html",
+        _ctx(request, error=None),
+    )
 
 
 @app.post("/login")
@@ -153,6 +158,7 @@ def login_submit(
     member = authenticate(username, pin)
     if not member:
         return templates.TemplateResponse(
+            request,
             "login.html",
             _ctx(request, error="Wrong PIN — try again."),
             status_code=400,
@@ -175,6 +181,7 @@ def home(request: Request):
     draft = storage.load_latest_draft()
     flash = request.session.pop("flash", None)
     return templates.TemplateResponse(
+        request,
         "home.html",
         _ctx(request, draft=draft, flash=flash),
     )
@@ -200,6 +207,7 @@ def customize_page(request: Request):
         return redirect
     open_recs = storage.active_recommendations()
     return templates.TemplateResponse(
+        request,
         "customize.html",
         _ctx(request, open_recs=open_recs, error=None),
     )
@@ -217,6 +225,7 @@ async def customize_submit(request: Request, plan: str = Form(...)):
     except Exception as exc:  # noqa: BLE001
         open_recs = storage.active_recommendations()
         return templates.TemplateResponse(
+            request,
             "customize.html",
             _ctx(request, open_recs=open_recs, error=str(exc), plan=plan),
             status_code=400,
@@ -233,6 +242,7 @@ def recommendations_page(request: Request):
     included = [r for r in storage.list_recommendations() if r.get("included")]
     flash = request.session.pop("flash", None)
     return templates.TemplateResponse(
+        request,
         "recommendations.html",
         _ctx(
             request,
@@ -256,6 +266,7 @@ def recommendations_submit(
         return redirect
     if not title.strip() or not body.strip():
         return templates.TemplateResponse(
+            request,
             "recommendations.html",
             _ctx(
                 request,
@@ -337,6 +348,7 @@ def review_page(request: Request):
     flash = request.session.pop("flash", None)
     consent_issues = storage.draft_unapproved_stories(draft)
     return templates.TemplateResponse(
+        request,
         "review.html",
         _ctx(
             request,
@@ -386,6 +398,7 @@ def internal_page(request: Request):
     flash = request.session.pop("flash", None)
     signals = research_svc.fetch_internal_signals(approved_only=False)
     return templates.TemplateResponse(
+        request,
         "internal.html",
         _ctx(request, signals=signals, flash=flash),
     )
@@ -498,6 +511,7 @@ def history_page(request: Request):
     logs = storage.list_send_logs()
     flash = request.session.pop("flash", None)
     return templates.TemplateResponse(
+        request,
         "history.html",
         _ctx(request, logs=logs, flash=flash),
     )
