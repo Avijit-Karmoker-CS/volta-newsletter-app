@@ -147,20 +147,19 @@ fly secrets set SLACK_WEBHOOK_URL=https://hooks.slack.com/services/... \
 
 ### Founder consent DMs (Ask in Slack)
 
-On **Staff recommendations**, tips with consent `not_requested` show **Ask in Slack**. That DMs the mapped person:
+On **Staff recommendations**, tips with consent `not_requested` show **Ask in Slack**. That opens a short form:
 
-> Volta wants to include this in the newsletter — OK to use it?  
-> **[Approve]** **[Decline]**
+1. Enter the approver’s **work email** or **Slack member ID** (U…) — the person Bader would message by hand
+2. Desk DMs them: “OK to use this in the newsletter?” with **Approve** / **Decline**
+3. Their tap updates `consent_status` on the tip; Bader rebuilds / sends as usual
 
-Approve/Decline hits `POST /slack/interactive` (signed) and calls the same `storage.set_consent_status()` as the in-app buttons.
-
-**v1 limitation:** Slack user IDs are a manual map in `app/services/staff.py` → `SLACK_USER_IDS`. If someone isn’t listed, the desk shows a clear *“No Slack ID on file for …”* message — it does not fail silently.
+Contacts are remembered in `VOLTA_DATA_DIR/slack_contacts.json` (no code edit required).
 
 ```bash
 fly secrets set SLACK_BOT_TOKEN=xoxb-...
 ```
 
-Also set Interactivity Request URL to `https://volta-newsletter.fly.dev/slack/interactive` (see `slack-app-manifest.yaml`).
+Bot scopes: `chat:write`, `im:write`, `users:read.email`. Interactivity URL: `https://volta-newsletter.fly.dev/slack/interactive`.
 
 ## Internal signals (manual)
 

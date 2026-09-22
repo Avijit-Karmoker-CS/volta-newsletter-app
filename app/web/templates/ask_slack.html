@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Ask in Slack · Volta Newsletter{% endblock %}
+{% block body %}
+<main class="wrap">
+  <h1>Ask in Slack</h1>
+  <p class="muted">
+    Send a DM asking for permission to use this tip in the newsletter.
+    When they tap Approve or Decline in Slack, consent updates here automatically —
+    then you can build and send as usual.
+  </p>
+
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+  <div class="card">
+    <p><strong>{{ rec.title }}</strong></p>
+    <p class="muted">Suggested by {{ rec.author }}</p>
+    <p>{{ rec.body }}</p>
+  </div>
+
+  <form method="post" action="/recommendations/{{ rec._id }}/ask-slack" class="card">
+    <p class="muted">
+      Who should approve this? (founder or staff — the person Bader would message by hand)
+    </p>
+    <p>
+      <label for="consent_name">Their name (optional)</label>
+      <input
+        id="consent_name"
+        name="consent_name"
+        type="text"
+        value="{{ consent_name or rec.author or '' }}"
+        placeholder="e.g. Jane Founder"
+      />
+    </p>
+    <p>
+      <label for="consent_email">Work email</label>
+      <input
+        id="consent_email"
+        name="consent_email"
+        type="email"
+        value="{{ consent_email or '' }}"
+        placeholder="jane@company.com"
+      />
+    </p>
+    <p class="muted" style="margin:0 0 8px">— or —</p>
+    <p>
+      <label for="slack_user_id">Slack member ID</label>
+      <input
+        id="slack_user_id"
+        name="slack_user_id"
+        type="text"
+        value="{{ slack_user_id or rec.consent_slack_user_id or '' }}"
+        placeholder="U012ABCDEF"
+      />
+    </p>
+    <p class="muted">
+      Slack profile → ⋮ menu → <em>Copy member ID</em>. We’ll remember this contact for next time.
+    </p>
+    <button class="btn btn-primary" type="submit">Send Slack consent request</button>
+    <a class="btn btn-ghost" href="/recommendations">Cancel</a>
+  </form>
+</main>
+{% endblock %}

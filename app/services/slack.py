@@ -127,6 +127,94 @@ def bot_token() -> str:
     return (os.getenv("SLACK_BOT_TOKEN") or "").strip()
 
 
+def resolve_consent_slack_id(
+    *,
+    slack_user_id: str = "",
+    email: str = "",
+    person_name: str = "",
+) -> str:
+    """Resolve who to DM for consent — form fields first, then saved map / staff.py.
+
+    Never silently miss: raises SlackAuthError / ValueError with a clear message.
+    """
+    from app.services import storage
+    from app.services.staff import SlackLookupError, resolve_slack_user_id
+
+    uid = (slack_user_id or "").strip()
+    mail = (email or "").strip()
+    name = (person_name or "").strip()
+
+    if uid:
+        if not uid.upper().startswith("U"):
+            raise ValueError(
+                "Slack member ID should look like U012ABCDEF (open their Slack "
+                "profile → ⋮ → Copy member ID)."
+            )
+        return uid
+
+    if mail:
+        if "@" not in mail:
+            raise ValueError("Enter a full email address, or a Slack member ID instead.")
+        # Saved map by email
+        contacts = storage.load_slack_contacts()
+        if contacts.get(mail.lower()):
+            return contacts[mail.lower()]
+        looked_up = lookup_slack_user_id_by_email(mail)
+        if looked_up:
+            storage.save_slack_contact(mail, looked_up)
+            if name:
+                storage.save_slack_contact(name, looked_up)
+            return looked_up
+        raise ValueError(
+            f"Couldn’t find a Slack user for {mail}. "
+            "Check the address, or paste their Slack member ID (U…) instead. "
+            "The bot also needs the users:read.email scope."
+        )
+
+    # Fall back to saved contacts / staff.py map by author name
+    if name:
+        contacts = storage.load_slack_contacts()
+        if contacts.get(name.lower()):
+            return contacts[name.lower()]
+        try:
+            return resolve_slack_user_id(name)
+        except SlackLookupError:
+            raise ValueError(
+                f"Who should approve this? Enter their work email or Slack member ID "
+                f"(no Slack contact on file yet for “{name}”)."
+            ) from None
+
+    raise ValueError("Enter the approver’s work email or Slack member ID.")
+
+
+def lookup_slack_user_id_by_email(email: str) -> str | None:
+    """Slack users.lookupByEmail — requires users:read.email on the bot."""
+    token = bot_token()
+    if not token:
+        raise SlackAuthError(
+            "SLACK_BOT_TOKEN is not configured. "
+            "Install the Slack app and set the Bot User OAuth Token on Fly."
+        )
+    try:
+        resp = requests.get(
+            "https://slack.com/api/users.lookupByEmail",
+            headers={"Authorization": f"Bearer {token}"},
+            params={"email": email.strip()},
+            timeout=8,
+        )
+        data = resp.json() if resp.content else {}
+    except requests.RequestException as exc:
+        raise SlackAuthError(f"Slack email lookup failed: {exc}") from exc
+
+    if data.get("ok") and data.get("user", {}).get("id"):
+        return str(data["user"]["id"])
+    # common: users_not_found, missing_scope, not_authed
+    err = data.get("error") or "unknown"
+    if err in {"users_not_found", "user_not_found"}:
+        return None
+    raise SlackAuthError(f"Slack email lookup error: {err}")
+
+
 def send_consent_request_dm(
     *,
     slack_user_id: str,

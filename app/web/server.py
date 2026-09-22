@@ -376,47 +376,107 @@ def recommendations_consent(
     return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
 
 
+@app.get("/recommendations/{rec_id}/ask-slack", response_class=HTMLResponse)
+def recommendations_ask_slack_form(request: Request, rec_id: str):
+    """Ask Bader who should approve — email or Slack member ID — then DM them."""
+    user, redirect = _require_user(request)
+    if redirect:
+        return redirect
+    rec = storage.get_recommendation(rec_id)
+    if not rec:
+        request.session["flash"] = "Recommendation not found."
+        return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Prefill from this tip or saved contacts
+    contacts = storage.load_slack_contacts()
+    author = (rec.get("author") or "").strip()
+    saved_id = rec.get("consent_slack_user_id") or contacts.get(author.lower(), "")
+    saved_email = rec.get("consent_ask_email") or ""
+
+    return templates.TemplateResponse(
+        request,
+        "ask_slack.html",
+        _ctx(
+            request,
+            rec=rec,
+            consent_name=author,
+            consent_email=saved_email,
+            slack_user_id=saved_id,
+            error=None,
+        ),
+    )
+
+
 @app.post("/recommendations/{rec_id}/ask-slack")
-def recommendations_ask_slack(request: Request, rec_id: str):
-    """DM the mapped Slack user with Approve / Decline (replaces hand messaging)."""
+async def recommendations_ask_slack(request: Request, rec_id: str):
+    """DM the chosen person with Approve / Decline; save contact for next time."""
     from app.services import slack as slack_svc
     from app.services.slack import SlackAuthError
-    from app.services.staff import SlackLookupError, resolve_slack_user_id
 
     user, redirect = _require_user(request)
     if redirect:
         return redirect
 
-    rec = None
-    for item in storage.list_recommendations():
-        if item.get("_id") == rec_id:
-            rec = item
-            break
+    rec = storage.get_recommendation(rec_id)
     if not rec:
         request.session["flash"] = "Recommendation not found."
         return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
 
-    author = rec.get("author") or ""
+    form = await request.form()
+    consent_name = str(form.get("consent_name") or rec.get("author") or "").strip()
+    consent_email = str(form.get("consent_email") or "").strip()
+    slack_user_id = str(form.get("slack_user_id") or "").strip()
+
+    def _form_error(msg: str):
+        return templates.TemplateResponse(
+            request,
+            "ask_slack.html",
+            _ctx(
+                request,
+                rec=rec,
+                consent_name=consent_name,
+                consent_email=consent_email,
+                slack_user_id=slack_user_id,
+                error=msg,
+            ),
+            status_code=400,
+        )
+
     try:
-        slack_uid = resolve_slack_user_id(author)
+        slack_uid = slack_svc.resolve_consent_slack_id(
+            slack_user_id=slack_user_id,
+            email=consent_email,
+            person_name=consent_name,
+        )
         slack_svc.send_consent_request_dm(
             slack_user_id=slack_uid,
             rec_id=rec_id,
             title=str(rec.get("title") or ""),
             body=str(rec.get("body") or ""),
-            author=str(author),
+            author=str(consent_name or rec.get("author") or ""),
         )
-        storage.set_consent_status(rec_id, "pending")
-        request.session["flash"] = (
-            f"Slack consent request sent to {author} for “{rec.get('title')}”."
-        )
-    except SlackLookupError as exc:
-        request.session["flash"] = str(exc)
-    except SlackAuthError as exc:
-        request.session["flash"] = str(exc)
+    except (ValueError, SlackAuthError) as exc:
+        return _form_error(str(exc))
     except Exception as exc:  # noqa: BLE001
-        request.session["flash"] = f"Couldn’t send Slack consent DM: {exc}"
+        return _form_error(f"Couldn’t send Slack consent DM: {exc}")
 
+    storage.update_recommendation(
+        rec_id,
+        consent_slack_user_id=slack_uid,
+        consent_ask_email=consent_email or None,
+        consent_ask_name=consent_name or None,
+    )
+    if consent_name:
+        storage.save_slack_contact(consent_name, slack_uid)
+    if consent_email:
+        storage.save_slack_contact(consent_email, slack_uid)
+
+    storage.set_consent_status(rec_id, "pending")
+    who = consent_email or consent_name or slack_uid
+    request.session["flash"] = (
+        f"Slack consent request sent to {who} for “{rec.get('title')}”. "
+        "When they Approve or Decline, status updates here — then build & send as usual."
+    )
     return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -469,8 +529,16 @@ async def slack_interactive(request: Request):
     else:
         text = (
             f"Thanks — marked *{label}* for “{updated.get('title')}”. "
-            "Bader can see this on the newsletter desk."
+            "Bader can see this on the newsletter desk and include it when building the letter."
         )
+        try:
+            slack_svc.post_webhook(
+                f"*Consent {label}* — “{updated.get('title')}” "
+                f"({updated.get('author') or 'staff tip'}). "
+                f"Desk: {(slack_svc.desk_public_url() or '')}/recommendations"
+            )
+        except Exception:  # noqa: BLE001
+            pass
 
     return JSONResponse(
         {

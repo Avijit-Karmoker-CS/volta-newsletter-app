@@ -41,9 +41,9 @@
           <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="not_requested">Reset</button>
         </form>
         {% if r.consent_status == "not_requested" %}
-        <form class="consent-row" method="post" action="/recommendations/{{ r._id }}/ask-slack">
-          <button class="btn btn-primary btn-small" type="submit">Ask in Slack</button>
-        </form>
+        <a class="btn btn-primary btn-small" href="/recommendations/{{ r._id }}/ask-slack">Ask in Slack</a>
+        {% elif r.consent_status == "pending" %}
+        <p class="muted">Consent request pending in Slack{% if r.consent_ask_email %} ({{ r.consent_ask_email }}){% elif r.consent_slack_user_id %} ({{ r.consent_slack_user_id }}){% endif %}.</p>
         {% endif %}
         <form class="consent-row" method="post" action="/recommendations/{{ r._id }}/hold">
           <input type="hidden" name="held" value="1" />

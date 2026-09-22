@@ -97,6 +97,49 @@ def set_consent_status(rec_id: str, status: str) -> dict | None:
     return payload
 
 
+def get_recommendation(rec_id: str) -> dict | None:
+    path = data_dir() / "recommendations" / f"{rec_id}.json"
+    if not path.exists():
+        return None
+    payload = _read(path, None)
+    if not isinstance(payload, dict):
+        return None
+    payload["_id"] = path.stem
+    payload["held"] = bool(payload.get("held"))
+    payload["consent_status"] = normalize_consent(payload.get("consent_status"))
+    return payload
+
+
+def update_recommendation(rec_id: str, **fields: Any) -> dict | None:
+    """Merge fields onto a recommendation JSON file."""
+    path = data_dir() / "recommendations" / f"{rec_id}.json"
+    if not path.exists():
+        return None
+    payload = _read(path, {})
+    if not isinstance(payload, dict):
+        return None
+    for key, value in fields.items():
+        if value is None:
+            payload.pop(key, None)
+        else:
+            payload[key] = value
+    payload["updated_at"] = utc_now()
+    _write(path, payload)
+    return get_recommendation(rec_id)
+
+
+def load_slack_contacts() -> dict[str, str]:
+    """Saved name/email → Slack user ID map (editable from the desk, not code)."""
+    data = _read(data_dir() / "slack_contacts.json", {})
+    return data if isinstance(data, dict) else {}
+
+
+def save_slack_contact(key: str, slack_user_id: str) -> None:
+    contacts = load_slack_contacts()
+    contacts[(key or "").strip().lower()] = (slack_user_id or "").strip()
+    _write(data_dir() / "slack_contacts.json", contacts)
+
+
 def set_held(rec_id: str, held: bool = True) -> dict | None:
     """Park a story for later (Bader's 'check back next month' mental note)."""
     path = data_dir() / "recommendations" / f"{rec_id}.json"
