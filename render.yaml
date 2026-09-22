@@ -1,0 +1,34 @@
+# Render Blueprint — free web service + optional persistent disk.
+# Free tier: attach a disk (or accept ephemeral data — see README).
+# Set secrets in the Render dashboard: VOLTA_SESSION_SECRET, MAILCHIMP_*, OPENAI_API_KEY.
+
+services:
+  - type: web
+    name: volta-newsletter
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    envVars:
+      - key: VOLTA_DATA_DIR
+        value: /data
+      - key: DEMO_MODE
+        value: "true"
+      - key: NEWSLETTER_CADENCE
+        value: monthly
+      - key: MAILCHIMP_SERVER_PREFIX
+        value: us1
+      - key: MAILCHIMP_AUDIENCE_ID
+        value: demo_volta_community
+      - key: MAILCHIMP_FROM_NAME
+        value: Volta
+      - key: MAILCHIMP_REPLY_TO
+        value: hello@voltaeffect.com
+      - key: VOLTA_SESSION_SECRET
+        generateValue: true
+      - key: MAILCHIMP_API_KEY
+        value: DEMO_MAILCHIMP_KEY
+    disk:
+      name: volta-data
+      mountPath: /data
+      sizeGB: 1

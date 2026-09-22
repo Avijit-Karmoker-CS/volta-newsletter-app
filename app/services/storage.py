@@ -10,6 +10,12 @@ from typing import Any
 
 
 def data_dir() -> Path:
+    """JSON store for recommendations, drafts, sends, and consent.
+
+    Set VOLTA_DATA_DIR to a persistent volume in production (e.g. /data on
+    Fly/Render). Ephemeral container disks wipe this on every redeploy —
+    without a mounted volume, staff tips and consent status are lost.
+    """
     root = Path(os.getenv("VOLTA_DATA_DIR", "./data/local")).expanduser()
     root.mkdir(parents=True, exist_ok=True)
     (root / "recommendations").mkdir(exist_ok=True)

@@ -24,12 +24,29 @@ from app.services.staff import STAFF, authenticate, can_send, desk_logins
 BASE = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
 
+_DEMO_SESSION_SECRET = "volta-internal-demo-secret"
+
+
+def _session_secret() -> str:
+    """Session signing key — must be set via env on any public/hosted deploy."""
+    secret = (os.getenv("VOLTA_SESSION_SECRET") or "").strip()
+    if secret and secret != _DEMO_SESSION_SECRET:
+        return secret
+    # Local laptop only. Never ship the hardcoded demo secret to a public URL.
+    if os.getenv("RENDER") or os.getenv("FLY_APP_NAME") or os.getenv("RAILWAY_ENVIRONMENT"):
+        raise RuntimeError(
+            "VOLTA_SESSION_SECRET must be set to a unique random value on the host "
+            "(e.g. openssl rand -hex 32). Do not use the local demo default."
+        )
+    return _DEMO_SESSION_SECRET
+
+
 app = FastAPI(title="Volta Newsletter")
 app.add_middleware(
     SessionMiddleware,
-    secret_key=os.getenv("VOLTA_SESSION_SECRET", "volta-internal-demo-secret"),
+    secret_key=_session_secret(),
     same_site="lax",
-    https_only=False,
+    https_only=bool(os.getenv("RENDER") or os.getenv("FLY_APP_NAME") or os.getenv("RAILWAY_ENVIRONMENT")),
 )
 app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 
