@@ -6,6 +6,8 @@
   <p class="muted">
     Adding as {{ user.display_name }}. Staff can also tip without login via
     <a href="/suggest">/suggest</a> (email-in).
+    Mark founder consent here the way Bader already does by message — only
+    <strong>approved</strong> stories enter the letter.
   </p>
   {% if error %}<div class="error">{{ error }}</div>{% endif %}
   {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
@@ -30,8 +32,17 @@
         {% else %}
         <span class="badge demo">Not yet included</span>
         {% endif %}
+        <span class="badge consent-{{ r.consent_status }}">Consent: {{ r.consent_status }}</span>
         <strong>{{ r.author }}</strong> — {{ r.title }}
         <p class="muted">{{ r.body }}</p>
+        {% if not r.included %}
+        <form class="consent-row" method="post" action="/recommendations/{{ r._id }}/consent">
+          <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="pending">Request</button>
+          <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="approved">Approved</button>
+          <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="declined">Declined</button>
+          <button class="btn btn-ghost btn-small" type="submit" name="consent_status" value="not_requested">Reset</button>
+        </form>
+        {% endif %}
       </div>
     {% else %}
       <p class="muted">No recommendations yet.</p>

@@ -12,6 +12,19 @@
 
   {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
 
+  {% if consent_issues %}
+  <div class="error consent-warn">
+    <strong>Founder consent missing</strong>
+    <p>These stories are in the draft without approved consent — don’t send until Bader gets a yes (same as messaging them by hand today):</p>
+    <ul>
+      {% for issue in consent_issues %}
+      <li>“{{ issue.title }}” ({{ issue.author }}) — <em>{{ issue.consent_status }}</em></li>
+      {% endfor %}
+    </ul>
+    <p><a href="/recommendations">Update consent →</a> then rebuild the letter.</p>
+  </div>
+  {% endif %}
+
   <div class="card preview-card">
     <div class="preview-toolbar">
       <strong>Inbox preview</strong>
@@ -46,8 +59,10 @@
     </div>
 
     <div class="sticky-actions btn-row two">
-      {% if can_send %}
+      {% if can_send and not consent_issues %}
       <button class="btn btn-success" type="submit">Email to community</button>
+      {% elif can_send and consent_issues %}
+      <button class="btn" type="submit" disabled title="Resolve founder consent first">Consent required</button>
       {% else %}
       <button class="btn" type="button" disabled>Only Bader/Matt can send</button>
       {% endif %}

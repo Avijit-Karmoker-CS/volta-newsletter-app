@@ -247,7 +247,26 @@ def recommendations_submit(
             status_code=400,
         )
     storage.save_recommendation(user.display_name, title, body)
-    request.session["flash"] = "Recommendation saved."
+    request.session["flash"] = "Recommendation saved (consent: not requested)."
+    return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.post("/recommendations/{rec_id}/consent")
+def recommendations_consent(
+    request: Request,
+    rec_id: str,
+    consent_status: str = Form(...),
+):
+    """Bader marks founder consent the way he already does by hand."""
+    user, redirect = _require_user(request)
+    if redirect:
+        return redirect
+    updated = storage.set_consent_status(rec_id, consent_status)
+    if not updated:
+        request.session["flash"] = "Recommendation not found."
+    else:
+        label = storage.normalize_consent(updated.get("consent_status"))
+        request.session["flash"] = f"Consent → {label} for “{updated.get('title')}”."
     return RedirectResponse("/recommendations", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -271,8 +290,11 @@ def review_page(request: Request):
         request.session["flash"] = "No draft yet — build one first."
         return RedirectResponse("/home", status_code=status.HTTP_303_SEE_OTHER)
     draft = _ensure_preview_html(draft)
+    # Refresh consent flags from storage (in case Bader toggled after build)
+    _sync_draft_consent(draft)
     members = mailchimp_svc.list_community_members()
     flash = request.session.pop("flash", None)
+    consent_issues = storage.draft_unapproved_stories(draft)
     return templates.TemplateResponse(
         "review.html",
         _ctx(
@@ -282,8 +304,25 @@ def review_page(request: Request):
             can_send=can_send(user),
             flash=flash,
             send_result=None,
+            consent_issues=consent_issues,
         ),
     )
+
+
+def _sync_draft_consent(draft: dict) -> None:
+    """Attach live consent_status onto draft staff_blocks from storage."""
+    by_id = {r.get("_id"): r for r in storage.list_recommendations()}
+    for block in draft.get("staff_blocks") or []:
+        rid = block.get("_id")
+        if rid and rid in by_id:
+            block["consent_status"] = storage.normalize_consent(
+                by_id[rid].get("consent_status")
+            )
+        else:
+            block["consent_status"] = storage.normalize_consent(
+                block.get("consent_status")
+            )
+    storage.save_draft(draft)
 
 
 @app.get("/preview", response_class=HTMLResponse)
@@ -316,6 +355,18 @@ async def review_send(request: Request):
     if not draft:
         request.session["flash"] = "No draft to send."
         return RedirectResponse("/home", status_code=status.HTTP_303_SEE_OTHER)
+
+    _sync_draft_consent(draft)
+    consent_issues = storage.draft_unapproved_stories(draft)
+    if consent_issues:
+        titles = ", ".join(
+            f"“{i.get('title')}” ({i.get('consent_status')})" for i in consent_issues
+        )
+        request.session["flash"] = (
+            f"Blocked: founder consent not approved for {titles}. "
+            "Mark approved on Staff recommendations, rebuild, then send."
+        )
+        return RedirectResponse("/review", status_code=status.HTTP_303_SEE_OTHER)
 
     form = await request.form()
     html = str(form.get("html") or draft.get("html") or "")

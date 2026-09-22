@@ -35,12 +35,22 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+CONSENT_STATUSES = ("not_requested", "pending", "approved", "declined")
+DEFAULT_CONSENT = "not_requested"
+
+
+def normalize_consent(status: str | None) -> str:
+    value = (status or DEFAULT_CONSENT).strip().lower()
+    return value if value in CONSENT_STATUSES else DEFAULT_CONSENT
+
+
 def list_recommendations() -> list[dict]:
     items: list[dict] = []
     for path in sorted((data_dir() / "recommendations").glob("*.json")):
         item = _read(path, None)
         if isinstance(item, dict):
             item["_id"] = path.stem
+            item["consent_status"] = normalize_consent(item.get("consent_status"))
             items.append(item)
     items.sort(key=lambda x: x.get("created_at", ""), reverse=True)
     return items
@@ -54,12 +64,46 @@ def save_recommendation(author: str, title: str, body: str, tags: list[str] | No
         "tags": tags or [],
         "created_at": utc_now(),
         "included": False,
+        "consent_status": DEFAULT_CONSENT,
     }
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
     path = data_dir() / "recommendations" / f"{stamp}_{author.lower()}.json"
     _write(path, payload)
     payload["_id"] = path.stem
     return payload
+
+
+def set_consent_status(rec_id: str, status: str) -> dict | None:
+    """Toggle founder consent: not_requested → pending → approved | declined."""
+    status = normalize_consent(status)
+    path = data_dir() / "recommendations" / f"{rec_id}.json"
+    if not path.exists():
+        return None
+    payload = _read(path, {})
+    payload["consent_status"] = status
+    payload["consent_updated_at"] = utc_now()
+    _write(path, payload)
+    payload["_id"] = path.stem
+    return payload
+
+
+def draft_unapproved_stories(draft: dict | None) -> list[dict]:
+    """Stories in the draft that are missing approved founder consent."""
+    if not draft:
+        return []
+    bad: list[dict] = []
+    for block in draft.get("staff_blocks") or []:
+        status = normalize_consent(block.get("consent_status"))
+        if status != "approved":
+            bad.append(
+                {
+                    "author": block.get("author"),
+                    "title": block.get("title"),
+                    "consent_status": status,
+                    "_id": block.get("_id"),
+                }
+            )
+    return bad
 
 
 def mark_recommendation_included(

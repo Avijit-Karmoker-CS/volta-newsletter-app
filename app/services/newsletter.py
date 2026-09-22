@@ -24,7 +24,13 @@ def week_of_label(day: datetime | None = None) -> str:
 def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, Any]:
     """Popular template: staff recommendations + trending community signals."""
     recs = staff_recs if staff_recs is not None else storage.list_recommendations()
-    pending = [r for r in recs if not r.get("included")]
+    # Only stories Bader has founder consent for (approved) enter the letter
+    pending = [
+        r
+        for r in recs
+        if not r.get("included")
+        and storage.normalize_consent(r.get("consent_status")) == "approved"
+    ]
     signals = research_svc.fetch_public_signals()
     week = week_of_label()
 
@@ -45,6 +51,7 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
             "title": r.get("title"),
             "body": r.get("body"),
             "_id": r.get("_id"),
+            "consent_status": storage.normalize_consent(r.get("consent_status")),
         }
         for r in pending[:6]
     ]
@@ -84,7 +91,12 @@ def build_default_newsletter(staff_recs: list[dict] | None = None) -> dict[str, 
 def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> dict[str, Any]:
     """Customize path: Bader's prompt + research + staff recommendations."""
     recs = staff_recs if staff_recs is not None else storage.list_recommendations()
-    pending = [r for r in recs if not r.get("included")]
+    pending = [
+        r
+        for r in recs
+        if not r.get("included")
+        and storage.normalize_consent(r.get("consent_status")) == "approved"
+    ]
     packet = research_svc.research_with_prompt(plan, pending)
     week = week_of_label()
 
@@ -112,6 +124,7 @@ def build_custom_newsletter(plan: str, staff_recs: list[dict] | None = None) -> 
             "title": r.get("title"),
             "body": r.get("body"),
             "_id": r.get("_id"),
+            "consent_status": storage.normalize_consent(r.get("consent_status")),
         }
         for r in pending[:6]
     ]

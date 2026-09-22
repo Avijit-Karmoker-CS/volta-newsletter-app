@@ -265,3 +265,15 @@ textarea.code {
 }
 .badge.demo { background: #3a2a1c; color: #e7b58a; }
 .badge.live { background: #1c3a2a; color: #8fd6b0; }
+.badge.consent-not_requested { background: #333; color: #b0aaa0; }
+.badge.consent-pending { background: #3a3420; color: #e6d089; }
+.badge.consent-approved { background: #1c3a2a; color: #8fd6b0; }
+.badge.consent-declined { background: #3a1c1c; color: #e89a9a; }
+.consent-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.consent-warn ul { margin: 8px 0 0; padding-left: 18px; }
+.consent-warn a { color: #ffc9c2; text-decoration: underline; }
